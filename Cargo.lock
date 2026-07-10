@@ -1097,6 +1097,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "game-scanner-ffi"
+version = "0.1.0"
+dependencies = [
+ "game-scanner",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "game-scanner-gui"
 version = "0.1.0"
 dependencies = [

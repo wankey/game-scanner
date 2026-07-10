@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "gui/src-tauri"]
+members = [".", "game-scanner-ffi", "gui/src-tauri"]
 resolver = "2"
 
 [package]

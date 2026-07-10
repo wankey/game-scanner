@@ -27,3 +27,8 @@ gui/src-tauri/gen/
 gui/node_modules/
 gui/dist/
 gui/.svelte-kit/
+
+# FFI demo build outputs
+game-scanner-ffi/examples/ffi_demo.exe
+game-scanner-ffi/examples/ffi_demo.obj
+game-scanner-ffi/examples/game_scanner_ffi.dll
