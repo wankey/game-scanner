@@ -29,10 +29,11 @@ pub fn supports(launcher: GameType, op: Op) -> bool {
         (_, List) | (_, Find) | (_, Executable) | (_, Launch)
         // Install: Origin, Steam, Ubisoft.
         | (Origin, Install) | (Steam, Install) | (Ubisoft, Install)
-        // Uninstall: Riot, Steam, Ubisoft.
-        | (RiotGames, Uninstall) | (Steam, Uninstall) | (Ubisoft, Uninstall)
-        // Get Processes & Close: Steam only.
+        // Uninstall: Riot, Steam, Ubisoft, Xbox.
+        | (RiotGames, Uninstall) | (Steam, Uninstall) | (Ubisoft, Uninstall) | (XboxGames, Uninstall)
+        // Get Processes & Close: Steam, Xbox.
         | (Steam, Processes) | (Steam, Close)
+        | (XboxGames, Processes) | (XboxGames, Close)
     )
 }
 
@@ -44,7 +45,7 @@ pub fn matrix() -> HashMap<String, Vec<Op>> {
     use GameType::*;
     let all_ops = [Op::List, Op::Find, Op::Executable, Op::Install, Op::Launch, Op::Uninstall, Op::Processes, Op::Close];
     let mut out = HashMap::new();
-    for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
+    for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
         let ops = all_ops.iter().copied().filter(|op| supports(launcher, *op)).collect();
         out.insert(launcher.to_string(), ops);
     }
@@ -59,28 +60,28 @@ mod tests {
     // --- Every launcher: list / find / executable / launch ---
     #[test]
     fn every_launcher_supports_list() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
             assert!(supports(launcher, Op::List), "{:?} should support List", launcher);
         }
     }
 
     #[test]
     fn every_launcher_supports_find() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
             assert!(supports(launcher, Op::Find), "{:?} should support Find", launcher);
         }
     }
 
     #[test]
     fn every_launcher_supports_executable() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
             assert!(supports(launcher, Op::Executable), "{:?} should support Executable", launcher);
         }
     }
 
     #[test]
     fn every_launcher_supports_launch() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
             assert!(supports(launcher, Op::Launch), "{:?} should support Launch", launcher);
         }
     }
@@ -134,13 +135,13 @@ mod tests {
 
     // --- Matrix shape ---
     #[test]
-    fn matrix_contains_all_eight_launchers() {
+    fn matrix_contains_all_nine_launchers() {
         let m = matrix();
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
             let key = launcher.to_string();
             assert!(m.contains_key(&key), "matrix missing {:?}", launcher);
         }
-        assert_eq!(m.len(), 8);
+        assert_eq!(m.len(), 9);
     }
 
     #[test]
@@ -159,5 +160,29 @@ mod tests {
         assert!(ops.contains(&Op::Find));
         assert!(ops.contains(&Op::Executable));
         assert!(ops.contains(&Op::Launch));
+    }
+
+    // --- Xbox-specific ---
+    #[test]
+    fn xbox_supports_uninstall_processes_close() {
+        assert!(supports(XboxGames, Op::Uninstall));
+        assert!(supports(XboxGames, Op::Processes));
+        assert!(supports(XboxGames, Op::Close));
+    }
+
+    #[test]
+    fn xbox_does_not_support_install() {
+        assert!(!supports(XboxGames, Op::Install));
+    }
+
+    #[test]
+    fn matrix_xbox_has_seven_ops() {
+        let m = matrix();
+        let ops = m.get("xbox").unwrap();
+        assert_eq!(ops.len(), 7);
+        for op in [Op::List, Op::Find, Op::Executable, Op::Launch, Op::Uninstall, Op::Processes, Op::Close] {
+            assert!(ops.contains(&op), "xbox matrix missing {:?}", op);
+        }
+        assert!(!ops.contains(&Op::Install));
     }
 }
