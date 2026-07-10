@@ -1,3 +1,7 @@
+[workspace]
+members = [".", "gui/src-tauri"]
+resolver = "2"
+
 [package]
 edition = "2021"
 build = "build.rs"
