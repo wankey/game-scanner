@@ -57,6 +57,7 @@ quick-xml = "0.41"
 
 [dev-dependencies]
 criterion = { version = "0.8.2" }
+tempfile = "3"
 
 [build-dependencies]
 prost-build = { version = "0.14.4" }

@@ -10,3 +10,4 @@ pub mod riotgames;
 pub mod steam;
 pub mod ubisoft;
 mod utils;
+mod xbox;
