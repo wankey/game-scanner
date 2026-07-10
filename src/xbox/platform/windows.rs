@@ -1,7 +1,14 @@
 use crate::error::{Error, ErrorKind, Result};
-use std::path::PathBuf;
-use windows::core::HSTRING;
-use windows::Management::Deployment::PackageManager;
+use std::{mem::size_of, path::PathBuf};
+use windows::{
+    core::HSTRING,
+    Management::Deployment::PackageManager,
+    Win32::{
+        Foundation::{CloseHandle, HANDLE},
+        Security::{GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY},
+        System::Threading::{GetCurrentProcess, OpenProcessToken},
+    },
+};
 
 const XBOX_FAMILY_PREFIXES: &[&str] = &[
     // Microsoft-first-party Xbox / Gaming clients and overlays
@@ -68,17 +75,53 @@ fn package_scope(is_elevated: bool) -> PackageScope {
     }
 }
 
+fn current_process_is_elevated() -> Result<bool> {
+    let mut token = HANDLE::default();
+    unsafe {
+        OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token)
+            .map_err(|e| Error::new(ErrorKind::IO, format!("OpenProcessToken failed: {e}")))?;
+
+        let mut elevation = TOKEN_ELEVATION::default();
+        let mut return_length = 0;
+        let query_result = GetTokenInformation(
+            token,
+            TokenElevation,
+            Some((&mut elevation as *mut TOKEN_ELEVATION).cast()),
+            size_of::<TOKEN_ELEVATION>() as u32,
+            &mut return_length,
+        );
+        let close_result = CloseHandle(token);
+
+        query_result.map_err(|e| {
+            Error::new(
+                ErrorKind::IO,
+                format!("GetTokenInformation(TokenElevation) failed: {e}"),
+            )
+        })?;
+        close_result.map_err(|e| Error::new(ErrorKind::IO, format!("CloseHandle failed: {e}")))?;
+
+        Ok(elevation.TokenIsElevated != 0)
+    }
+}
+
 pub fn get_packages() -> Result<Vec<XboxPackage>> {
     let pm = PackageManager::new()
         .map_err(|e| Error::new(ErrorKind::IO, format!("PackageManager::new failed: {e}")))?;
 
-    // The `windows` crate's WinRT projection does NOT expose
-    // `IPackageManager::FindPackagesForUser` — only the SID-based
-    // overloads. We use `FindPackages()` which enumerates the current
-    // user (no args), which is what we want.
-    let packages = pm
-        .FindPackages()
-        .map_err(|e| Error::new(ErrorKind::IO, format!("FindPackages failed: {e}")))?;
+    // `FindPackages` needs elevation because it enumerates every user. An
+    // empty SID selects only the current user through the SID-based overload.
+    let (packages, operation) = match package_scope(current_process_is_elevated()?) {
+        PackageScope::AllUsers => (pm.FindPackages(), "FindPackages"),
+        PackageScope::CurrentUser => {
+            let current_user = HSTRING::new();
+            (
+                pm.FindPackagesByUserSecurityId(&current_user),
+                "FindPackagesByUserSecurityId",
+            )
+        }
+    };
+    let packages =
+        packages.map_err(|e| Error::new(ErrorKind::IO, format!("{operation} failed: {e}")))?;
 
     let mut out = Vec::new();
     for pkg in packages {
