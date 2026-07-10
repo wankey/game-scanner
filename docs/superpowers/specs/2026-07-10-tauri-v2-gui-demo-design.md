@@ -85,6 +85,7 @@ Commands:
 | `launch_game` | `manager::launch_game(&game)` | `game: Game` |
 | `close_game` | `manager::close_game(&game)` | `game: Game` |
 | `get_processes` | `manager::get_processes(&game)` | `game: Game` |
+| `get_capabilities` | `capability::matrix()` returns `HashMap<GameType, Vec<Op>>` | none |
 
 `GameType` is serialized to its lowercase string form (`steam`, `epicgames`, etc.) so the wire format matches `GameType::to_string()`.
 
@@ -94,22 +95,22 @@ Commands:
 
 `lib/stores.ts` holds five `writable` stores: `currentLauncher`, `games`, `selectedGame`, `processes`, `launcherExecutable`. Stores are updated by command responses and user actions; components subscribe to render.
 
-`lib/capabilities.ts` mirrors the Rust matrix in TypeScript so the UI can enable/disable buttons without an IPC roundtrip. The matrix values match `capability.rs` exactly; this is verified by a doc-comment cross-reference checked in code review.
+`lib/capabilities.ts` does not exist as a separate source of truth. Instead, the frontend calls a `get_capabilities` command once on app boot, which returns `HashMap<GameType, Vec<Op>>` from the Rust `capability.rs` matrix. The result is cached in a `writable` store (`capabilities`) and consumed by `ActionPanel` and `LauncherList`. This eliminates the risk of the TS mirror drifting from the Rust source of truth.
 
 `lib/tauri.ts` exports typed wrappers (`listGames(launcher): Promise<Game[]>`, `launchGame(game): Promise<void>`, etc.) over `invoke()`. Each wrapper handles the rejection path and rethrows so callers can toast.
 
 Components:
 
-- `LauncherList.svelte` — vertical list of 8 launchers. Each row shows the launcher name plus a small badge with the count of supported ops (computed from `capabilities.ts`). Selecting a launcher updates `currentLauncher`.
+- `LauncherList.svelte` — vertical list of 8 launchers. Each row shows the launcher name plus a small badge with the count of supported ops (read from the `capabilities` store). Selecting a launcher updates `currentLauncher`.
 - `GamesTable.svelte` — subscribes to `currentLauncher` and `games`. On launcher change, calls `listGames` and resets `selectedGame`. Columns: name, id, installed, needs update, downloading. Click a row to set `selectedGame`. Toolbar above the table holds `[Refresh]` and `[Find by Id]`.
-- `ActionPanel.svelte` — reads `selectedGame` and `currentLauncher`. Renders buttons for every op; each button's `disabled` is `!supports(currentLauncher, op)` and its tooltip explains why an op is unsupported when disabled. Also shows the launcher executable path fetched via `launcherExecutable`. When the selected game is `Launched`, a 5-second interval calls `getProcesses` and updates `processes`.
+- `ActionPanel.svelte` — reads `selectedGame`, `currentLauncher`, and the `capabilities` store. Renders buttons for every op; each button's `disabled` is `!capabilities.get(currentLauncher)?.includes(op)` and its tooltip explains why an op is unsupported when disabled. Also shows the launcher executable path fetched via `launcherExecutable`. When the selected game is `Launched`, a 5-second interval calls `getProcesses` and updates `processes`.
 - `FindDialog.svelte` — modal with one text input. On submit calls `findGame(currentLauncher, id)` and sets `selectedGame`.
 
 `App.svelte` lays out the three panels with CSS grid: sidebar (240px) | table (flex 1) | actions (320px). A small footer shows `game-scanner v{version}` for context.
 
 ## Data flow
 
-1. App startup → `currentLauncher.set('steam')` → `GamesTable` effect fires → `invoke('list_games', { launcher: 'steam' })` → JSON array back → `games.set([...])` → table renders. In parallel, `invoke('launcher_executable', { launcher: 'steam' })` populates the action panel header.
+1. App startup → `invoke('get_capabilities')` populates the `capabilities` store → `currentLauncher.set('steam')` → `GamesTable` effect fires → `invoke('list_games', { launcher: 'steam' })` → JSON array back → `games.set([...])` → table renders. In parallel, `invoke('launcher_executable', { launcher: 'steam' })` populates the action panel header.
 2. User selects a row → `selectedGame.set(game)` → `ActionPanel` re-renders with the right enabled buttons.
 3. User clicks `Launch` → `invoke('launch_game', { game })`. On success a toast appears and a polling timer starts; on failure the error is toasted.
 4. User clicks `Close` → `invoke('close_game', { game })` → polling stops, `processes` is cleared.
