@@ -46,6 +46,8 @@ pub fn games() -> Result<Vec<Game>> {
 
 /// Looks up a single Xbox game by its `PackageFullName`.
 pub fn find(id: &str) -> Result<Game> {
+    // TODO(perf): cache the WinRT scan if `find` is called frequently;
+    // today each call re-runs `PackageManager::FindPackages` + N manifest parses.
     let all = games()?;
     all.into_iter().find(|g| g.id == id).ok_or_else(|| {
         Error::new(
