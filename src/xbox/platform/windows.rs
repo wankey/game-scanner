@@ -54,6 +54,20 @@ pub struct XboxPackage {
     pub install_location: PathBuf,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum PackageScope {
+    AllUsers,
+    CurrentUser,
+}
+
+fn package_scope(is_elevated: bool) -> PackageScope {
+    if is_elevated {
+        PackageScope::AllUsers
+    } else {
+        PackageScope::CurrentUser
+    }
+}
+
 pub fn get_packages() -> Result<Vec<XboxPackage>> {
     let pm = PackageManager::new()
         .map_err(|e| Error::new(ErrorKind::IO, format!("PackageManager::new failed: {e}")))?;
@@ -144,6 +158,16 @@ pub fn remove_package(full_name: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn package_scope_uses_all_users_for_an_elevated_process() {
+        assert_eq!(package_scope(true), PackageScope::AllUsers);
+    }
+
+    #[test]
+    fn package_scope_uses_current_user_for_a_non_elevated_process() {
+        assert_eq!(package_scope(false), PackageScope::CurrentUser);
+    }
 
     #[test]
     fn is_game_matches_first_party_xbox_clients() {
