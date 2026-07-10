@@ -124,6 +124,22 @@ mod ubisoft {
     }
 }
 
+#[cfg(target_os = "windows")]
+mod xbox {
+    use super::*;
+
+    #[test]
+    fn games() -> Result<(), Error> {
+        let games = game_scanner::xbox::games()
+            .or::<Error>(Ok(Vec::<Game>::new()))
+            .unwrap();
+
+        assert_eq!(GAME_LIST_RETURN_TYPE, type_of(&games));
+
+        Ok(())
+    }
+}
+
 fn type_of<T>(_: T) -> &'static str {
     type_name::<T>()
 }
