@@ -30,6 +30,7 @@ in [index.d.ts](./node/lib/index.d.ts).
 | Riot Games | ❓                                        | ✅       | ❌     | ✅     |
 | Steam      | ✅                                        | ✅       | ❌     | ✅     |
 | Ubisoft    | ❌                                        | ✅       | ❌     | ❌     |
+| Xbox     | ❓                                        | ✅       | ❌     | ❌     |
 
 <a name="multi-directories"></a>[1]: **Multi-directories**: is different game install locations (e.g., folders, and
 drivers).
@@ -46,6 +47,7 @@ drivers).
 | Riot Games | ❌       | ✅      | ✅         |
 | Steam      | ✅       | ✅      | ✅         |
 | Ubisoft    | ✅       | ✅      | ✅         |
+| Xbox     | ❌       | ✅      | ✅         |
 
 ### Game State support
 
@@ -59,6 +61,7 @@ drivers).
 | Riot Games | ❌         | ❌            | ❌           | ❌           | ❌              |
 | Steam      | ✅         | ✅            | ✅           | ✅           | ✅              |
 | Ubisoft    | ❌         | ❌            | ❌           | ❌           | ❌              |
+| Xbox     | ❌         | ❌            | ❌           | ❌           | ❌              |
 
 ### Operations
 
@@ -72,6 +75,7 @@ drivers).
 | Riot Games | ✅          | ✅                       | ✅                      |
 | Steam      | ✅          | ✅                       | ✅                      |
 | Ubisoft    | ✅          | ✅                       | ✅                      |
+| Xbox     | ✅          | ✅                       | ✅                      |
 
 <a name="find-game"></a>[1]: **Find Game**: you can find for a specific game passing only the `id`.
 
@@ -87,6 +91,7 @@ drivers).
 | Riot Games | ✅      | ❓             | ❓     |
 | Steam      | ✅      | ✅             | ✅     |
 | Ubisoft    | ✅      | ❓             | ❓     |
+| Xbox     | ✅      | ❓             | ❓     |
 
 <a name="get-processes"></a>[1]: **Game Processes**: return a list with all `Id` or `PID` of processes from a specific
 game.
