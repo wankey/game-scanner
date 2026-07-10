@@ -49,6 +49,11 @@ rusqlite = { version = "0.40.1",  features = ["bundled"] }
 case = { version = "1.0.0" }
 winreg = { version = "0.56.0" }
 rusqlite = { version = "0.40.1", features = ["bundled-windows"] }
+windows = { version = "0.58", features = [
+    "Management_Deployment",
+    "ApplicationModel",
+], default-features = false }
+quick-xml = "0.36"
 
 [dev-dependencies]
 criterion = { version = "0.8.2" }
