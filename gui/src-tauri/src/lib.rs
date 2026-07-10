@@ -1,3 +1,5 @@
+mod capability;
+
 pub fn run() {
     tauri::Builder::default()
         .setup(|_app| Ok(()))
