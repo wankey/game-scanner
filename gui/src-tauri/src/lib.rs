@@ -31,6 +31,31 @@ fn get_capabilities() -> HashMap<String, Vec<capability::Op>> {
     commands::get_capabilities()
 }
 
+#[tauri::command]
+fn install_game(game: Game) -> Result<(), String> {
+    commands::install_game(&game)
+}
+
+#[tauri::command]
+fn uninstall_game(game: Game) -> Result<(), String> {
+    commands::uninstall_game(&game)
+}
+
+#[tauri::command]
+fn launch_game(game: Game) -> Result<(), String> {
+    commands::launch_game(&game)
+}
+
+#[tauri::command]
+fn close_game(game: Game) -> Result<(), String> {
+    commands::close_game(&game)
+}
+
+#[tauri::command]
+fn get_processes(game: Game) -> Option<Vec<u32>> {
+    commands::get_processes(&game)
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -38,6 +63,11 @@ pub fn run() {
             find_game,
             launcher_executable,
             get_capabilities,
+            install_game,
+            uninstall_game,
+            launch_game,
+            close_game,
+            get_processes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

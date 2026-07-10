@@ -59,3 +59,27 @@ pub fn get_capabilities() -> HashMap<String, Vec<Op>> {
 pub fn parse_launcher(name: &str) -> GameType {
     GameType::from(name.to_string())
 }
+
+pub fn install_game(game: &Game) -> Result<(), String> {
+    let raw: Result<(), _> = game_scanner::manager::install_game(game);
+    raw.map_err(|e| e.to_string())
+}
+
+pub fn uninstall_game(game: &Game) -> Result<(), String> {
+    let raw: Result<(), _> = game_scanner::manager::uninstall_game(game);
+    raw.map_err(|e| e.to_string())
+}
+
+pub fn launch_game(game: &Game) -> Result<(), String> {
+    let raw: Result<(), _> = game_scanner::manager::launch_game(game);
+    raw.map_err(|e| e.to_string())
+}
+
+pub fn close_game(game: &Game) -> Result<(), String> {
+    let raw: Result<(), _> = game_scanner::manager::close_game(game);
+    raw.map_err(|e| e.to_string())
+}
+
+pub fn get_processes(game: &Game) -> Option<Vec<u32>> {
+    game_scanner::manager::get_processes(game)
+}
