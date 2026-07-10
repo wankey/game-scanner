@@ -57,7 +57,9 @@ game-scanner/
 │       ├── process.rs               # UWP 进程枚举（按 install_location 匹配）
 │       └── platform/
 │           ├── mod.rs               # cfg_attr 分发
-│           └── windows.rs           # WinRT PackageManager 调用
+│           ├── windows.rs           # WinRT PackageManager 调用
+│           ├── linux.rs             # stub 返回 LauncherNotFound
+│           └── macos.rs             # stub 返回 LauncherNotFound
 ├── game-scanner-ffi/
 │   ├── include/game_scanner.h       # 文档注释更新
 │   └── src/lib.rs                   # parse_launcher / gs_list / gs_find / gs_executable 加 arm
@@ -103,7 +105,7 @@ struct XboxGame {
 
 1. `platform::windows::get_packages()` → `Vec<XboxGame>` via `PackageManager::FindPackagesForUser(None)`.
 2. Filter via `is_game(&family_name)` (allow-list, see § Filtering).
-3. For each survivor, parse `<install_location>\AppxManifest.xml` via `manifest::parse` to fill `application_id` + `display_name` (a small number of games have no manifest — skipped with a debug print).
+3. For each survivor, parse `<install_location>\AppxManifest.xml` via `manifest::parse` to fill `application_id` + `display_name`. If the manifest is missing or malformed, skip the package and `print_error` at debug level — never abort the whole scan for one bad entry.
 4. Map each `XboxGame` to the public `Game` shape:
    - `_type = "xbox"`
    - `id = full_name`
@@ -371,8 +373,8 @@ WinRT errors are uniformly wrapped as `Error::new(ErrorKind::IO, format!("{ctx}:
 | `RemovePackageAsync` → 0x80073CF9 | `InvalidManifest` | "Package is referenced by another app; uninstall dependents first" |
 | `RemovePackageAsync` → 0x80073CFA | `LauncherNotFound` | "Package not installed or owned by another user" |
 | `RemovePackageAsync` → 0x80073D02 / D06 | `IO` | "Package is currently in use" |
-| `std::io::Error` reading manifest | `IO` | "AppxManifest.xml missing for <full_name>" (debug print only, game skipped) |
-| `quick_xml::Error` parsing manifest | `InvalidManifest` | "Failed to parse <path>: <xml error>" (game skipped) |
+| `std::io::Error` reading manifest | `IO` | "AppxManifest.xml missing for <full_name>" — print, skip the package, continue scanning |
+| `quick_xml::Error` parsing manifest | `InvalidManifest` | "Failed to parse <path>: <xml error>" — print, skip the package, continue scanning |
 | `executable()` — no `Microsoft.GamingApp_*` package | `LauncherNotFound` | "Xbox app not installed" |
 
 No new `ErrorKind` variant is added. New variants would propagate to the FFI / Node binding surfaces and the capability matrix; the existing ones are sufficient.
@@ -409,7 +411,7 @@ mod xbox {
 }
 ```
 
-Same shape as the eight existing launchers; on a machine without Xbox / Microsoft Store installed, the call returns `LauncherNotFound`, which `or::<Error>(Ok(Vec::new()))` swallows.
+Same shape as the existing launchers; on a machine without Xbox / Microsoft Store installed, the call returns `LauncherNotFound`, which `or::<Error>(Ok(Vec::new()))` swallows.
 
 ### Capability matrix tests (`gui/src-tauri/src/capability.rs::tests`)
 
