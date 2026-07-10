@@ -10,7 +10,7 @@
 //! The `launcher` argument is the snake-case name used by
 //! `game_scanner::prelude::GameType::to_string`:
 //! `amazongames`, `blizzard`, `epicgames`, `gog`, `origin`,
-//! `riotgames`, `steam`, `ubisoft`.
+//! `riotgames`, `steam`, `ubisoft`, `xbox`.
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
