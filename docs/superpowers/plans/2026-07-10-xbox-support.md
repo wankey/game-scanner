@@ -165,14 +165,20 @@ In `Cargo.toml`, add a new block after the existing `[target.'cfg(windows)'.depe
 case = { version = "1.0.0" }
 winreg = { version = "0.56.0" }
 rusqlite = { version = "0.40.1", features = ["bundled-windows"] }
-windows = { version = "0.58", features = [
+windows = { version = "0.61", features = [
     "Management_Deployment",
     "ApplicationModel",
-], default-features = false }
-quick-xml = "0.36"
+] }
+quick-xml = "0.41"
 ```
 
 (The `case`, `winreg`, and `rusqlite` lines are the existing block — leave them as they are. Only the `windows` and `quick-xml` lines are new.)
+
+> **Why these versions (revised after code review):**
+> - `windows = "0.61"` is the version the workspace's `tauri` crate already pulls in. Reusing it avoids a second copy of the WinRT projections and a redundant recompile.
+> - The `windows` Rust projection does NOT expose `IPackageManager::FindPackagesForUser` or `Package::InstallLocation` (string) — only the SID-based variants and `Package::InstalledPath` / `InstalledLocation`. Task 5 below has been adjusted to use `pm.FindPackages()` (current user, no args) and `pkg.InstalledPath()` (HSTRING). The two feature flags remain the minimum needed for `PackageManager` + `Package` to be in scope.
+> - `default-features = false` is **not** set. The `windows` crate's only default feature is `std`; disabling it removes `windows-core/std` which gates `std::error::Error` impls we need elsewhere. There is no measurable compile-time cost to keeping it.
+> - `quick-xml = "0.41"` matches the version already in the lockfile (transitively pulled by another crate), avoiding a second `quick-xml` and a second recompile. 0.41's `Reader` API is also the API Task 3's parser code uses.
 
 - [ ] **Step 2: Build the Windows target**
 
@@ -545,12 +551,13 @@ pub fn get_packages() -> Result<Vec<XboxPackage>> {
     let pm = PackageManager::new()
         .map_err(|e| Error::new(ErrorKind::IO, format!("PackageManager::new failed: {e}")))?;
 
-    let packages = pm.FindPackagesForUser(None).map_err(|e| {
-        Error::new(
-            ErrorKind::IO,
-            format!("FindPackagesForUser failed: {e}"),
-        )
-    })?;
+    // The `windows` crate's WinRT projection does NOT expose
+    // `IPackageManager::FindPackagesForUser` — only the SID-based
+    // overloads. We use `FindPackages()` which enumerates the current
+    // user (no args), which is what we want.
+    let packages = pm
+        .FindPackages()
+        .map_err(|e| Error::new(ErrorKind::IO, format!("FindPackages failed: {e}")))?;
 
     let mut out = Vec::new();
     for pkg in packages {
@@ -572,8 +579,11 @@ pub fn get_packages() -> Result<Vec<XboxPackage>> {
             Err(_) => continue,
         };
 
-        let install_location = match pkg.InstallLocation() {
-            Ok(loc) => PathBuf::from(loc.to_string()),
+        // The projection exposes `InstalledPath` (HSTRING) and
+        // `InstalledLocation` (StorageFolder). `InstalledPath` is the
+        // direct string and avoids the StorageFolder round-trip.
+        let install_location = match pkg.InstalledPath() {
+            Ok(s) => PathBuf::from(s.to_string_lossy()),
             Err(_) => continue,
         };
 

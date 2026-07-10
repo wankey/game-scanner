@@ -34,7 +34,7 @@ This spec covers the Rust core module, the C ABI bindings, the Tauri demo GUI, t
 | --- | --- |
 | Coverage | Microsoft Store **and** Xbox App for PC installed games (Game Pass library included) |
 | Platform | Windows only |
-| Data source | `Windows.Management.Deployment.PackageManager::FindPackagesForUser` WinRT API |
+| Data source | `Windows.Management.Deployment.PackageManager::FindPackages` WinRT API (current user) |
 | Filtering | Family-name prefix allow-list (~25 entries), 0 false positives |
 | Operations exposed | `list`, `find`, `executable`, `launch`, `uninstall`, `processes`, `close` (no `install`) |
 | Manifest parsing | `quick-xml` for `<Application Id>` and `<DisplayName>` only |
@@ -103,7 +103,7 @@ struct XboxGame {
 
 ### `games()`
 
-1. `platform::windows::get_packages()` → `Vec<XboxGame>` via `PackageManager::FindPackagesForUser(None)`.
+1. `platform::windows::get_packages()` → `Vec<XboxGame>` via `PackageManager::FindPackages()` (current user, no args).
 2. Filter via `is_game(&family_name)` (allow-list, see § Filtering).
 3. For each survivor, parse `<install_location>\AppxManifest.xml` via `manifest::parse` to fill `application_id` + `display_name`. If the manifest is missing or malformed, skip the package and `print_error` at debug level — never abort the whole scan for one bad entry.
 4. Map each `XboxGame` to the public `Game` shape:
@@ -137,11 +137,11 @@ struct XboxGame {
 ```toml
 # Cargo.toml
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.58", features = [
+windows = { version = "0.61", features = [
     "Management_Deployment",
     "ApplicationModel",
-], default-features = false }
-quick-xml = "0.36"
+] }
+quick-xml = "0.41"
 ```
 
 `windows` is gated on `cfg(windows)` so Linux / macOS builds remain unaffected.
@@ -152,12 +152,12 @@ quick-xml = "0.36"
 use windows::{core::HSTRING, Management::Deployment::PackageManager};
 
 let pm = PackageManager::new()?;
-let packages = pm.FindPackagesForUser(None)?;  // None = current user
+let packages = pm.FindPackages()?;  // current user; FindPackagesForUser is not in the projection
 for pkg in packages {
     let id = pkg.Id()?;
     let full_name = id.FullName()?.to_string();
     let family_name = id.FamilyName()?.to_string();
-    let install_location = pkg.InstallLocation()?.to_string();
+    let install_location = pkg.InstalledPath()?.to_string_lossy().to_string();
     // ... filter + manifest parse
 }
 ```
@@ -348,7 +348,7 @@ commands::list_games → game_scanner::xbox::games()
   ↓
 xbox::platform::windows::get_packages()
   ↓
-PackageManager::FindPackagesForUser(None)        [WinRT]
+PackageManager::FindPackages()                 [WinRT]
   ↓
 for each pkg: filter via XBOX_FAMILY_PREFIXES     [in-memory]
   ↓
@@ -369,7 +369,7 @@ WinRT errors are uniformly wrapped as `Error::new(ErrorKind::IO, format!("{ctx}:
 
 | WinRT / source | `ErrorKind` | User-facing message shape |
 | --- | --- | --- |
-| `FindPackagesForUser` throws | `IO` | "Package enumeration failed: <winrt message>" |
+| `FindPackages` throws | `IO` | "Package enumeration failed: <winrt message>" |
 | `RemovePackageAsync` → 0x80073CF9 | `InvalidManifest` | "Package is referenced by another app; uninstall dependents first" |
 | `RemovePackageAsync` → 0x80073CFA | `LauncherNotFound` | "Package not installed or owned by another user" |
 | `RemovePackageAsync` → 0x80073D02 / D06 | `IO` | "Package is currently in use" |
@@ -445,23 +445,23 @@ No CI environment has the prerequisite Microsoft Store + Game Pass install; the 
 ```toml
 # Cargo.toml — new section
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.58", features = [
+windows = { version = "0.61", features = [
     "Management_Deployment",
     "ApplicationModel",
-], default-features = false }
-quick-xml = "0.36"
+] }
+quick-xml = "0.41"
 ```
 
 No new top-level dependencies. `windows` and `quick-xml` are Windows-gated and do not affect Linux / macOS builds.
 
 ## Open risks
 
-- **Compilation time.** `windows` crate adds ~3–5 minutes to a clean Windows build. Mitigated by gating on `cfg(windows)` so non-Windows builds stay fast, and by `default-features = false` plus a minimal feature set.
+- **Compilation time.** `windows` crate adds ~3–5 minutes to a clean Windows build. Mitigated by gating on `cfg(windows)` so non-Windows builds stay fast, and by using `windows = "0.61"` — the same version already in the workspace's `tauri` lockfile, so no second copy of the WinRT projections is compiled.
 - **Allow-list coverage.** Long-tail indie Game Pass titles whose family names do not match any prefix are silently skipped. The list is editable in one place; expansion is low-risk but not free.
 - **Pure-UWP process detection.** v1 matches by exe path / cwd under `install_location`. Pure UWP apps whose host process is `svchost.exe` or a generic runtime broker may not be matched. The README / `docs/xbox.md` note this as a known limitation.
 - **Windows 10 vs Windows 11 manifest schema drift.** `quick-xml` does not validate the schema; it just reads the elements we care about. New optional elements in the schema are ignored without error.
-- **`windows` crate API churn.** Microsoft occasionally restructures WinRT projections. Pinning to `0.58` and watching the crate's changelog is the recommended forward path.
-- **Permissions.** `FindPackagesForUser` works for the current user without elevation. `RemovePackageAsync` triggers the standard Windows Apps & Features confirmation prompt for per-user packages — no UAC escalation needed for normal users.
+- **`windows` crate API churn.** Microsoft occasionally restructures WinRT projections. Pinning to `0.61` and watching the crate's changelog is the recommended forward path.
+- **Permissions.** `FindPackages` (current user) works without elevation. `RemovePackageAsync` triggers the standard Windows Apps & Features confirmation prompt for per-user packages — no UAC escalation needed for normal users.
 
 ## Implementation order (high level)
 
