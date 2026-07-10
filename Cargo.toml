@@ -52,6 +52,9 @@ rusqlite = { version = "0.40.1", features = ["bundled-windows"] }
 windows = { version = "0.61", features = [
     "Management_Deployment",
     "ApplicationModel",
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Threading",
 ] }
 quick-xml = "0.41"
 
