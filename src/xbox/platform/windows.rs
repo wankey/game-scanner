@@ -187,4 +187,14 @@ mod tests {
     fn is_game_empty_string_returns_false() {
         assert!(!is_game(""));
     }
+
+    #[test]
+    fn is_game_matches_every_listed_prefix() {
+        // Regression guard: a typo or accidental removal of any entry
+        // in XBOX_FAMILY_PREFIXES should fail this test.
+        for prefix in XBOX_FAMILY_PREFIXES {
+            let synthetic = format!("{prefix}.SomeGame_abc123");
+            assert!(is_game(&synthetic), "prefix `{prefix}` should match");
+        }
+    }
 }
