@@ -9,5 +9,5 @@ pub mod prelude;
 pub mod riotgames;
 pub mod steam;
 pub mod ubisoft;
+pub mod xbox;
 mod utils;
-mod xbox;
