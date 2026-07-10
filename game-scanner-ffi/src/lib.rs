@@ -18,7 +18,7 @@ use std::os::raw::c_char;
 use game_scanner::{
     amazon, blizzard, epicgames, gog, origin,
     prelude::{Game, GameType},
-    riotgames, steam, ubisoft,
+    riotgames, steam, ubisoft, xbox,
 };
 
 /// Releases a string previously returned by this library.
@@ -42,6 +42,7 @@ fn parse_launcher(name: &str) -> Option<GameType> {
         "riotgames" => GameType::RiotGames,
         "steam" => GameType::Steam,
         "ubisoft" => GameType::Ubisoft,
+        "xbox" => GameType::XboxGames,
         _ => return None,
     })
 }
@@ -62,6 +63,7 @@ pub extern "C" fn gs_list(launcher: *const c_char, out: *mut *mut c_char) -> i32
         GameType::RiotGames => riotgames::games(),
         GameType::Steam => steam::games(),
         GameType::Ubisoft => ubisoft::games(),
+        GameType::XboxGames => xbox::games(),
     };
 
     match raw {
@@ -90,6 +92,7 @@ pub extern "C" fn gs_find(
         GameType::RiotGames => riotgames::find(&id),
         GameType::Steam => steam::find(&id),
         GameType::Ubisoft => ubisoft::find(&id),
+        GameType::XboxGames => xbox::find(&id),
     };
 
     match raw {
@@ -113,6 +116,7 @@ pub extern "C" fn gs_executable(launcher: *const c_char, out: *mut *mut c_char) 
         GameType::RiotGames => riotgames::executable(),
         GameType::Steam => steam::executable(),
         GameType::Ubisoft => ubisoft::executable(),
+        GameType::XboxGames => xbox::executable(),
     };
 
     match raw {
@@ -242,7 +246,7 @@ mod tests {
         // The GameType names map to themselves via to_string/from.
         for name in [
             "amazongames", "blizzard", "epicgames", "gog",
-            "origin", "riotgames", "steam", "ubisoft",
+            "origin", "riotgames", "steam", "ubisoft", "xbox",
         ] {
             let l = parse_launcher(name).unwrap();
             assert_eq!(l.to_string(), name);
