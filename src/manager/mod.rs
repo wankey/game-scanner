@@ -43,6 +43,10 @@ pub fn install_game(game: &Game) -> Result<()> {
 }
 
 pub fn uninstall_game(game: &Game) -> Result<()> {
+    if game._type == "xbox" {
+        return crate::xbox::uninstall(game);
+    }
+
     let mut command = process::Command::new("");
 
     if game.commands.uninstall.is_none() {
@@ -117,6 +121,9 @@ pub fn launch_game(game: &Game) -> Result<()> {
 }
 
 pub fn get_processes(game: &Game) -> Option<Vec<u32>> {
+    if game._type == "xbox" {
+        return crate::xbox::processes(game);
+    }
     let sys = System::new_all();
     let processes = sys.processes();
 
