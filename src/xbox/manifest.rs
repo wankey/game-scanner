@@ -29,7 +29,7 @@ pub fn parse(path: &Path) -> Result<ParsedManifest> {
             Ok(Event::Start(e)) => {
                 let name = e.name();
                 let name_bytes = name.as_ref();
-                if name_bytes == b"Application" {
+                if name_bytes == b"Application" && application_id.is_empty() {
                     current_app_open = true;
                     for attr in e.attributes().flatten() {
                         if attr.key.as_ref() == b"Id" {
@@ -132,5 +132,28 @@ mod tests {
         let body = "not xml at all";
         let f = write_manifest(body);
         assert!(parse(f.path()).is_err());
+    }
+
+    #[test]
+    fn parse_handles_open_form_application_element() {
+        // <Application Id="X">...</Application> (non-self-closing) must
+        // still surface the Id. The inner content is ignored, so we put
+        // an XML-looking text inside to prove the parser does not mistake
+        // it for DisplayName.
+        let body = r#"<?xml version="1.0" encoding="utf-8"?>
+<Package>
+  <Properties>
+    <DisplayName>Minecraft</DisplayName>
+  </Properties>
+  <Applications>
+    <Application Id="Minecraft" Executable="Minecraft.exe">
+      <uap:VisualElements DisplayName="Should be ignored" />
+    </Application>
+  </Applications>
+</Package>"#;
+        let f = write_manifest(body);
+        let parsed = parse(f.path()).unwrap();
+        assert_eq!(parsed.application_id, "Minecraft");
+        assert_eq!(parsed.display_name, "Minecraft");
     }
 }
