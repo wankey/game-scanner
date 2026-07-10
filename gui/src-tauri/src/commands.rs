@@ -1,6 +1,6 @@
 use crate::capability::{matrix as capability_matrix, Op};
 use game_scanner::{
-    amazon, blizzard, epicgames, gog, origin, prelude::{Game, GameType}, riotgames, steam, ubisoft,
+    amazon, blizzard, epicgames, gog, origin, prelude::{Game, GameType}, riotgames, steam, ubisoft, xbox,
 };
 use std::{collections::HashMap, path::PathBuf};
 
@@ -18,6 +18,7 @@ pub fn list_games(launcher: GameType) -> Result<Vec<Game>, String> {
         GameType::RiotGames => riotgames::games(),
         GameType::Steam => steam::games(),
         GameType::Ubisoft => ubisoft::games(),
+        GameType::XboxGames => xbox::games(),
     };
     raw.map_err(|e| e.to_string())
 }
@@ -32,6 +33,7 @@ pub fn find_game(launcher: GameType, id: &str) -> Result<Game, String> {
         GameType::RiotGames => riotgames::find(id),
         GameType::Steam => steam::find(id),
         GameType::Ubisoft => ubisoft::find(id),
+        GameType::XboxGames => xbox::find(id),
     };
     raw.map_err(|e| e.to_string())
 }
@@ -46,6 +48,7 @@ pub fn launcher_executable(launcher: GameType) -> Result<PathBuf, String> {
         GameType::RiotGames => riotgames::executable(),
         GameType::Steam => steam::executable(),
         GameType::Ubisoft => ubisoft::executable(),
+        GameType::XboxGames => xbox::executable(),
     };
     raw.map_err(|e| e.to_string())
 }
