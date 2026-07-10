@@ -31,27 +31,28 @@ name = "list"
 harness = false
 
 [dependencies]
-serde = { version = "1.0.139", features = ["derive"] }
-serde_json = { version = "1.0.82" }
-serde_yaml = { version = "0.8.26" }
-url = { version = "2.2.2" }
-sysinfo = { version = "0.24.6" }
-prost = { version = "0.10.4" }
-prost-types = { version = "0.10.1" }
-bytes = { version = "1.1.0" }
-chrono = { version = "0.4.19" }
-directories = { version = "4.0.1" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.150" }
+serde_yaml = { version = "0.9.34" }
+url = { version = "2.5.8" }
+sysinfo = { version = "0.39.5" }
+prost = { version = "0.14.4" }
+prost-types = { version = "0.14.4" }
+bytes = { version = "1.12.1" }
+chrono = { version = "0.4.45" }
+directories = { version = "6.0.0" }
 
 [target.'cfg(unix)'.dependencies]
-rusqlite = { version = "0.28.0",  features = ["bundled"] }
+rusqlite = { version = "0.40.1",  features = ["bundled"] }
 
 [target.'cfg(windows)'.dependencies]
 case = { version = "1.0.0" }
-winreg = { version = "0.10.1" }
-rusqlite = { version = "0.28.0", features = ["bundled-windows"] }
+winreg = { version = "0.56.0" }
+rusqlite = { version = "0.40.1", features = ["bundled-windows"] }
 
 [dev-dependencies]
-criterion = { version = "0.3.6" }
+criterion = { version = "0.8.2" }
 
 [build-dependencies]
-prost-build = { version = "0.10.4" }
+prost-build = { version = "0.14.4" }
+protoc-bin-vendored = { version = "3.2.0" }

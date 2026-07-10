@@ -3,7 +3,7 @@ use crate::{
     prelude::Game,
 };
 use std::{path::Path, process};
-use sysinfo::{Pid, PidExt, ProcessExt, System, SystemExt};
+use sysinfo::{Pid, System};
 
 pub fn install_game(game: &Game) -> Result<()> {
     let mut command = process::Command::new("");
@@ -120,9 +120,12 @@ pub fn get_processes(game: &Game) -> Option<Vec<u32>> {
     let sys = System::new_all();
     let processes = sys.processes();
 
-    let str_array_contains =
-        |path: &[String], value: &str| String::from(path.to_vec().join(" ")).contains(value);
-    let path_contains = |path: &Path, value: &str| path.display().to_string().contains(value);
+    let str_array_contains = |path: &[std::ffi::OsString], value: &str| {
+        path.iter().any(|arg| arg.to_string_lossy().contains(value))
+    };
+    let path_contains = |path: Option<&Path>, value: &str| {
+        path.is_some_and(|path| path.display().to_string().contains(value))
+    };
 
     let mut list = Vec::new();
 
