@@ -1,0 +1,1 @@
+// macOS is not supported. See linux.rs for the explanation.
