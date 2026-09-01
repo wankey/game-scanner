@@ -57,3 +57,23 @@ pub fn get_manifests_path() -> Result<PathBuf> {
 
     return Ok(manifests_path);
 }
+
+#[cfg(test)]
+mod tests {
+    use winreg::{enums::HKEY_LOCAL_MACHINE, RegKey};
+
+    #[test]
+    fn finds_epic_games_native_registry_view() {
+        let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+        if hklm
+            .open_subkey("SOFTWARE\\Epic Games\\EpicGamesLauncher")
+            .is_err()
+        {
+            return;
+        }
+
+        let manifests = super::get_manifests_path()
+            .expect("Epic Games registry key should be found");
+        assert!(manifests.exists());
+    }
+}
