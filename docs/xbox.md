@@ -11,27 +11,14 @@
 
 ### Games
 
-Games are enumerated the same way: every Appx package the current user has
-installed is inspected. A package is included in the result if its
-`FamilyName` matches one of the allow-listed prefixes in
-`src/xbox/platform/windows.rs::XBOX_FAMILY_PREFIXES`.
+The scan follows GameFinder's Xbox handler. It enumerates every mounted drive,
+uses `Program Files\ModifiableWindowsApps` when present, and parses each
+drive's `.GamingRoot` file for additional Xbox installation folders. It then
+inspects each direct child directory for `AppxManifest.xml`, falling back to
+`Content\AppxManifest.xml`.
 
-The `Name`, `Publisher`, `InstallLocation`, `Version`, and `FullName` come
-from the `Package` object directly. The `<Application Id="...">` and
-`<DisplayName>` come from parsing
-`<install_location>\AppxManifest.xml` via `src/xbox/manifest.rs`.
-
-### Start game
-
-```commandline
-explorer.exe shell:AppsFolder\<FamilyName>!<ApplicationId>
-```
-
-### Uninstall game
-
-Uninstall is a WinRT call to `PackageManager::RemovePackageAsync(<FullName>)`
-— the standard Windows Apps & Features flow runs underneath, with the
-usual confirmation prompt for per-user packages.
+`<Identity Name="...">` is the game ID and `<DisplayName>` is the displayed
+name. The game path is the directory containing the manifest.
 
 ### Close launcher
 
@@ -45,8 +32,8 @@ the OS, not by an in-band command.
   expose the package's install path. Win32-packaged games such as Forza
   Horizon 5, Minecraft Bedrock, and the Age of Empires series are detected
   normally.
-- The allow-list is curated and may miss long-tail indie Game Pass titles.
-  New publishers can be added by appending their `FamilyName` prefix to
-  `XBOX_FAMILY_PREFIXES` in `src/xbox/platform/windows.rs`.
+- This discovery model exposes no package full name or package family name,
+  so it cannot generate the `AppsFolder` launch command or call
+  `RemovePackageAsync` to uninstall a game.
 - Linux and macOS are not supported. The module compiles on every host but
   returns `LauncherNotFound` on non-Windows.

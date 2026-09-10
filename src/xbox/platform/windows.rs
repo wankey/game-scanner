@@ -1,65 +1,22 @@
 use crate::error::{Error, ErrorKind, Result};
-use std::{mem::size_of, path::PathBuf};
+use std::{
+    fs,
+    io::Read,
+    mem::size_of,
+    path::{Component, Path, PathBuf},
+};
 use windows::{
     core::HSTRING,
     Management::Deployment::PackageManager,
     Win32::{
         Foundation::{CloseHandle, HANDLE},
         Security::{GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY},
+        Storage::FileSystem::GetLogicalDrives,
         System::Threading::{GetCurrentProcess, OpenProcessToken},
     },
 };
 
-const XBOX_FAMILY_PREFIXES: &[&str] = &[
-    // Microsoft-first-party Xbox / Gaming clients and overlays
-    "Microsoft.GamingApp",
-    "Microsoft.XboxApp",
-    "Microsoft.XboxGameOverlay",
-    "Microsoft.XboxGamingOverlay",
-    "Microsoft.XboxSpeechToTextOverlay",
-    "Microsoft.XboxGameCallableUI",
-    "Microsoft.XboxIdentityProvider",
-    "Microsoft.Xbox.TCUI",
-    // Microsoft Studios first-party IPs that ship as MSIX
-    "Microsoft.MicrosoftSolitaireCollection",
-    "Microsoft.MinecraftUWP",
-    "Microsoft.Mojang",
-    "Microsoft.Halo",
-    "Microsoft.Forza",
-    "Microsoft.AgeOfEmpires",
-    "Microsoft.GearsOfWar",
-    "Microsoft.FlightSimulator",
-    "Microsoft.Oslo",
-    // Third-party publishers commonly appearing in Xbox Game Pass
-    "Bethesda",
-    "2K",
-    "Activision",
-    "ElectronicArts",
-    "Rockstar",
-    "Ubisoft",
-    "SEGA",
-    "SquareEnix",
-    "BandaiNamco",
-    "ParadoxInteractive",
-    "CoffeeStainStudios",
-    "DevolverDigital",
-    "505Games",
-    "DeepSilver",
-    "FocusHomeInteractive",
-    "KalypsoMedia",
-];
-
-fn is_game(family_name: &str) -> bool {
-    XBOX_FAMILY_PREFIXES
-        .iter()
-        .any(|prefix| family_name.starts_with(prefix))
-}
-
-pub struct XboxPackage {
-    pub full_name: String,
-    pub family_name: String,
-    pub install_location: PathBuf,
-}
+const GAMING_ROOT_MAGIC: u32 = 0x5842_4752;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum PackageScope {
@@ -104,10 +61,9 @@ fn current_process_is_elevated() -> Result<bool> {
     }
 }
 
-pub fn get_packages() -> Result<Vec<XboxPackage>> {
-    let pm = PackageManager::new()
-        .map_err(|e| Error::new(ErrorKind::IO, format!("PackageManager::new failed: {e}")))?;
-
+fn packages_for_current_scope(
+    pm: &PackageManager,
+) -> Result<impl IntoIterator<Item = windows::ApplicationModel::Package>> {
     // `FindPackages` needs elevation because it enumerates every user. An
     // empty SID selects only the current user through the SID-based overload.
     let (packages, operation) = match package_scope(current_process_is_elevated()?) {
@@ -120,10 +76,160 @@ pub fn get_packages() -> Result<Vec<XboxPackage>> {
             )
         }
     };
-    let packages =
-        packages.map_err(|e| Error::new(ErrorKind::IO, format!("{operation} failed: {e}")))?;
+    packages.map_err(|e| Error::new(ErrorKind::IO, format!("{operation} failed: {e}")))
+}
 
-    let mut out = Vec::new();
+pub fn get_game_manifests() -> Vec<PathBuf> {
+    let app_folders = get_app_folders_from_roots(root_directories());
+    get_game_manifests_from_folders(&app_folders)
+}
+
+fn root_directories() -> Vec<PathBuf> {
+    let drives = unsafe { GetLogicalDrives() };
+    (0..26)
+        .filter(|index| drives & (1 << index) != 0)
+        .map(|index| PathBuf::from(format!("{}:\\", (b'A' + index as u8) as char)))
+        .collect()
+}
+
+fn get_app_folders_from_roots(roots: Vec<PathBuf>) -> Vec<PathBuf> {
+    let mut folders = Vec::new();
+    for root in roots {
+        let modifiable_windows_apps = root.join("Program Files").join("ModifiableWindowsApps");
+        if modifiable_windows_apps.is_dir() {
+            folders.push(modifiable_windows_apps);
+        }
+
+        let gaming_root = root.join(".GamingRoot");
+        if !gaming_root.is_file() {
+            continue;
+        }
+
+        match parse_gaming_root(&gaming_root) {
+            Ok(additional_folders) => folders.extend(additional_folders),
+            Err(error) => crate::error::print_error(&error),
+        }
+    }
+    folders
+}
+
+fn parse_gaming_root(path: &Path) -> Result<Vec<PathBuf>> {
+    let mut file = fs::File::open(path).map_err(|e| {
+        Error::new(
+            ErrorKind::IO,
+            format!("Unable to open .GamingRoot at {}: {e}", path.display()),
+        )
+    })?;
+    let mut header = [0; 8];
+    file.read_exact(&mut header).map_err(|e| {
+        Error::new(
+            ErrorKind::InvalidManifest,
+            format!("Unable to read .GamingRoot at {}: {e}", path.display()),
+        )
+    })?;
+
+    let magic = u32::from_le_bytes(header[..4].try_into().unwrap());
+    if magic != GAMING_ROOT_MAGIC {
+        return Err(Error::new(
+            ErrorKind::InvalidManifest,
+            format!("Invalid .GamingRoot magic at {}", path.display()),
+        ));
+    }
+
+    let folder_count = u32::from_le_bytes(header[4..].try_into().unwrap());
+    if folder_count >= u8::MAX as u32 {
+        return Err(Error::new(
+            ErrorKind::InvalidManifest,
+            format!("Too many folders in .GamingRoot at {}", path.display()),
+        ));
+    }
+
+    let parent = path.parent().unwrap_or_else(|| Path::new(""));
+    let mut folders = Vec::with_capacity(folder_count as usize);
+    for _ in 0..folder_count {
+        let mut units = Vec::new();
+        loop {
+            let mut bytes = [0; 2];
+            file.read_exact(&mut bytes).map_err(|e| {
+                Error::new(
+                    ErrorKind::InvalidManifest,
+                    format!(
+                        "Unable to read folder from .GamingRoot at {}: {e}",
+                        path.display()
+                    ),
+                )
+            })?;
+            let unit = u16::from_le_bytes(bytes);
+            if unit == 0 {
+                break;
+            }
+            units.push(unit);
+        }
+        let folder = String::from_utf16(&units).map_err(|e| {
+            Error::new(
+                ErrorKind::InvalidManifest,
+                format!(
+                    "Invalid UTF-16 folder in .GamingRoot at {}: {e}",
+                    path.display()
+                ),
+            )
+        })?;
+        let relative = Path::new(&folder);
+        if relative.components().any(|component| {
+            matches!(
+                component,
+                Component::Prefix(_) | Component::RootDir | Component::ParentDir
+            )
+        }) {
+            return Err(Error::new(
+                ErrorKind::InvalidManifest,
+                format!("Invalid folder in .GamingRoot at {}", path.display()),
+            ));
+        }
+        folders.push(parent.join(relative));
+    }
+    Ok(folders)
+}
+
+fn get_game_manifests_from_folders(app_folders: &[PathBuf]) -> Vec<PathBuf> {
+    let mut manifests = Vec::new();
+    for app_folder in app_folders {
+        let entries = match fs::read_dir(app_folder) {
+            Ok(entries) => entries,
+            Err(error) => {
+                crate::error::print_error(&Error::new(
+                    ErrorKind::IO,
+                    format!(
+                        "Unable to read Xbox app folder {}: {error}",
+                        app_folder.display()
+                    ),
+                ));
+                continue;
+            }
+        };
+        for entry in entries.flatten() {
+            let game_folder = entry.path();
+            if !game_folder.is_dir() {
+                continue;
+            }
+            let manifest = game_folder.join("AppxManifest.xml");
+            if manifest.is_file() {
+                manifests.push(manifest);
+                continue;
+            }
+            let content_manifest = game_folder.join("Content").join("AppxManifest.xml");
+            if content_manifest.is_file() {
+                manifests.push(content_manifest);
+            }
+        }
+    }
+    manifests
+}
+
+pub fn get_launcher_executable() -> Result<PathBuf> {
+    let pm = PackageManager::new()
+        .map_err(|e| Error::new(ErrorKind::IO, format!("PackageManager::new failed: {e}")))?;
+    let packages = packages_for_current_scope(&pm)?;
     for pkg in packages {
         let id = match pkg.Id() {
             Ok(id) => id,
@@ -134,73 +240,41 @@ pub fn get_packages() -> Result<Vec<XboxPackage>> {
             Err(_) => continue,
         };
 
-        if !is_game(&family_name) {
+        if !family_name.starts_with("Microsoft.GamingApp") {
             continue;
         }
-
-        let full_name = match id.FullName() {
-            Ok(s) => s.to_string(),
-            Err(_) => continue,
-        };
-
-        // The projection exposes `InstalledPath` (HSTRING) and
-        // `InstalledLocation` (StorageFolder). `InstalledPath` is the
-        // direct string and avoids the StorageFolder round-trip.
         let install_location = match pkg.InstalledPath() {
             Ok(s) => PathBuf::from(s.to_string_lossy()),
             Err(_) => continue,
         };
-
-        out.push(XboxPackage {
-            full_name,
-            family_name,
-            install_location,
-        });
+        let executable = install_location.join("XboxApp.exe");
+        if executable.is_file() {
+            return Ok(executable);
+        }
     }
-
-    Ok(out)
-}
-
-pub fn get_launcher_executable() -> Result<PathBuf> {
-    let packages = get_packages()?;
-    let gaming_app = packages
-        .iter()
-        .find(|p| p.family_name.starts_with("Microsoft.GamingApp"))
-        .ok_or_else(|| {
-            Error::new(
-                ErrorKind::LauncherNotFound,
-                "Xbox app is not installed (no Microsoft.GamingApp_* package found)",
-            )
-        })?;
-    let exe = gaming_app.install_location.join("XboxApp.exe");
-    if !exe.exists() {
-        return Err(Error::new(
-            ErrorKind::LauncherNotFound,
-            format!("XboxApp.exe missing at {}", exe.display()),
-        ));
-    }
-    Ok(exe)
-}
-
-pub fn remove_package(full_name: &str) -> Result<()> {
-    let pm = PackageManager::new()
-        .map_err(|e| Error::new(ErrorKind::IO, format!("PackageManager::new failed: {e}")))?;
-    let hn = HSTRING::from(full_name);
-    let op = pm
-        .RemovePackageAsync(&hn)
-        .map_err(|e| Error::new(ErrorKind::IO, format!("RemovePackageAsync failed: {e}")))?;
-    // `IAsyncOperationWithProgress::GetResults` blocks (internally
-    // joins) until the WinRT operation completes and returns the
-    // final `DeploymentResult`. We don't need to inspect it here —
-    // a non-error result means the removal succeeded.
-    op.GetResults()
-        .map_err(|e| Error::new(ErrorKind::IO, format!("RemovePackageAsync wait failed: {e}")))?;
-    Ok(())
+    Err(Error::new(
+        ErrorKind::LauncherNotFound,
+        "Xbox app is not installed (no Microsoft.GamingApp_* package found)",
+    ))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
+
+    fn write_gaming_root(path: &Path, folders: &[&str]) {
+        let mut file = fs::File::create(path).unwrap();
+        file.write_all(&GAMING_ROOT_MAGIC.to_le_bytes()).unwrap();
+        file.write_all(&(folders.len() as u32).to_le_bytes())
+            .unwrap();
+        for folder in folders {
+            for unit in folder.encode_utf16() {
+                file.write_all(&unit.to_le_bytes()).unwrap();
+            }
+            file.write_all(&0u16.to_le_bytes()).unwrap();
+        }
+    }
 
     #[test]
     fn package_scope_uses_all_users_for_an_elevated_process() {
@@ -213,55 +287,38 @@ mod tests {
     }
 
     #[test]
-    fn is_game_matches_first_party_xbox_clients() {
-        for name in [
-            "Microsoft.GamingApp_8wekyb3d8bbwe",
-            "Microsoft.XboxApp_8wekyb3d8bbwe",
-            "Microsoft.MinecraftUWP_8wekyb3d8bbwe",
-            "Microsoft.Halo_8wekyb3d8bbwe",
-            "Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe",
-        ] {
-            assert!(is_game(name), "should match: {name}");
-        }
+    fn finds_modifiable_windows_apps_and_gaming_root_folders() {
+        let root = tempfile::tempdir().unwrap();
+        let modifiable = root
+            .path()
+            .join("Program Files")
+            .join("ModifiableWindowsApps");
+        let xbox_games = root.path().join("XboxGames");
+        fs::create_dir_all(&modifiable).unwrap();
+        fs::create_dir_all(&xbox_games).unwrap();
+        write_gaming_root(&root.path().join(".GamingRoot"), &["XboxGames"]);
+
+        let folders = get_app_folders_from_roots(vec![root.path().to_path_buf()]);
+        assert_eq!(folders, vec![modifiable, xbox_games]);
     }
 
     #[test]
-    fn is_game_matches_third_party_publishers() {
-        for name in [
-            "Bethesda.SomeGame_abc123",
-            "2K.NBA2K25_def456",
-            "Activision.CallOfDuty_ghi789",
-            "Ubisoft.AssassinsCreed_jkl012",
-        ] {
-            assert!(is_game(name), "should match: {name}");
-        }
-    }
+    fn finds_manifests_in_game_folder_or_content_subfolder() {
+        let root = tempfile::tempdir().unwrap();
+        let direct = root.path().join("Direct");
+        let content = root.path().join("Content").join("Content");
+        fs::create_dir_all(&direct).unwrap();
+        fs::create_dir_all(&content).unwrap();
+        fs::write(direct.join("AppxManifest.xml"), "<Package />").unwrap();
+        fs::write(content.join("AppxManifest.xml"), "<Package />").unwrap();
 
-    #[test]
-    fn is_game_rejects_non_games() {
-        for name in [
-            "Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe",
-            "Microsoft.WindowsStore_8wekyb3d8bbwe",
-            "Microsoft.ScreenSketch_8wekyb3d8bbwe",
-            "Microsoft.YourPhone_8wekyb3d8bbwe",
-            "Microsoft.BingNews_8wekyb3d8bbwe",
-        ] {
-            assert!(!is_game(name), "should NOT match: {name}");
-        }
-    }
-
-    #[test]
-    fn is_game_empty_string_returns_false() {
-        assert!(!is_game(""));
-    }
-
-    #[test]
-    fn is_game_matches_every_listed_prefix() {
-        // Regression guard: a typo or accidental removal of any entry
-        // in XBOX_FAMILY_PREFIXES should fail this test.
-        for prefix in XBOX_FAMILY_PREFIXES {
-            let synthetic = format!("{prefix}.SomeGame_abc123");
-            assert!(is_game(&synthetic), "prefix `{prefix}` should match");
-        }
+        let mut manifests = get_game_manifests_from_folders(&[root.path().to_path_buf()]);
+        manifests.sort();
+        let mut expected = vec![
+            direct.join("AppxManifest.xml"),
+            content.join("AppxManifest.xml"),
+        ];
+        expected.sort();
+        assert_eq!(manifests, expected);
     }
 }

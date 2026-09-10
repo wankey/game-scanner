@@ -47,7 +47,7 @@ drivers).
 | Riot Games | ❌       | ✅      | ✅         |
 | Steam      | ✅       | ✅      | ✅         |
 | Ubisoft    | ✅       | ✅      | ✅         |
-| Xbox     | ❌       | ✅      | ✅         |
+| Xbox     | ❌       | ❌      | ❌         |
 
 ### Game State support
 
@@ -91,7 +91,7 @@ drivers).
 | Riot Games | ✅      | ❓             | ❓     |
 | Steam      | ✅      | ✅             | ✅     |
 | Ubisoft    | ✅      | ❓             | ❓     |
-| Xbox     | ✅      | ❓             | ❓     |
+| Xbox     | ❌      | ✅             | ✅     |
 
 <a name="get-processes"></a>[1]: **Game Processes**: return a list with all `Id` or `PID` of processes from a specific
 game.

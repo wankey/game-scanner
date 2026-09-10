@@ -8,9 +8,6 @@ use crate::{
 };
 use std::path::PathBuf;
 
-#[cfg(target_os = "windows")]
-use self::platform::XboxPackage;
-
 /// Returns the path to `XboxApp.exe` inside the `Microsoft.GamingApp_*`
 /// package, or `LauncherNotFound` if the Xbox App is not installed.
 pub fn executable() -> Result<PathBuf> {
@@ -27,9 +24,8 @@ pub fn executable() -> Result<PathBuf> {
     }
 }
 
-/// Returns every installed Microsoft Store / Xbox App game this machine
-/// exposes. The list is filtered by an internal allow-list of FamilyName
-/// prefixes (see `platform::windows::XBOX_FAMILY_PREFIXES`).
+/// Returns Xbox games from the folders declared by `ModifiableWindowsApps`
+/// and `.GamingRoot`, following the GameFinder discovery model.
 pub fn games() -> Result<Vec<Game>> {
     #[cfg(target_os = "windows")]
     {
@@ -44,10 +40,8 @@ pub fn games() -> Result<Vec<Game>> {
     }
 }
 
-/// Looks up a single Xbox game by its `PackageFullName`.
+/// Looks up a single Xbox game by its manifest `Identity.Name`.
 pub fn find(id: &str) -> Result<Game> {
-    // TODO(perf): cache the WinRT scan if `find` is called frequently;
-    // today each call re-runs `PackageManager::FindPackages` + N manifest parses.
     let all = games()?;
     all.into_iter().find(|g| g.id == id).ok_or_else(|| {
         Error::new(
@@ -57,39 +51,13 @@ pub fn find(id: &str) -> Result<Game> {
     })
 }
 
-/// Uninstalls the supplied Xbox game via the WinRT `RemovePackageAsync` API.
-pub fn uninstall(game: &Game) -> Result<()> {
-    let cmd = game.commands.uninstall.as_ref().ok_or_else(|| {
-        Error::new(
-            ErrorKind::InvalidGame,
-            "xbox::uninstall called with a Game that has no uninstall command",
-        )
-    })?;
-    if cmd.first().map(|s| s.as_str()) != Some("__xbox__:remove_package") {
-        return Err(Error::new(
-            ErrorKind::InvalidGame,
-            "xbox::uninstall called with a non-xbox game (sentinel mismatch)",
-        ));
-    }
-    let full_name = cmd.get(1).ok_or_else(|| {
-        Error::new(
-            ErrorKind::InvalidGame,
-            "xbox::uninstall command missing the package full name",
-        )
-    })?;
-
-    #[cfg(target_os = "windows")]
-    {
-        platform::remove_package(full_name)
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        let _ = full_name;
-        Err(Error::new(
-            ErrorKind::LauncherNotFound,
-            "Xbox / Microsoft Store is not supported on this platform",
-        ))
-    }
+/// GameFinder-style disk discovery does not provide a package full name,
+/// so these results cannot be uninstalled through `RemovePackageAsync`.
+pub fn uninstall(_game: &Game) -> Result<()> {
+    Err(Error::new(
+        ErrorKind::InvalidGame,
+        "Xbox games discovered from disk do not expose an uninstall command",
+    ))
 }
 
 /// Returns the PIDs of processes whose exe path or cwd falls under the
@@ -102,10 +70,9 @@ pub fn processes(game: &Game) -> Option<Vec<u32>> {
 
 #[cfg(target_os = "windows")]
 fn scan_all() -> Result<Vec<Game>> {
-    let packages = platform::get_packages()?;
     let mut out = Vec::new();
-    for pkg in packages {
-        match build_game(pkg) {
+    for manifest_path in platform::get_game_manifests() {
+        match build_game(&manifest_path) {
             Ok(g) => out.push(g),
             Err(e) => {
                 // Per spec: one bad manifest must not abort the whole scan.
@@ -117,25 +84,23 @@ fn scan_all() -> Result<Vec<Game>> {
 }
 
 #[cfg(target_os = "windows")]
-fn build_game(pkg: XboxPackage) -> Result<Game> {
-    let manifest_path = pkg.install_location.join("AppxManifest.xml");
-    let parsed = manifest::parse(&manifest_path)?;
+fn build_game(manifest_path: &std::path::Path) -> Result<Game> {
+    let parsed = manifest::parse(manifest_path)?;
+    let game_path = manifest_path.parent().ok_or_else(|| {
+        Error::new(
+            ErrorKind::InvalidManifest,
+            format!(
+                "Manifest has no parent directory: {}",
+                manifest_path.display()
+            ),
+        )
+    })?;
 
     let mut game = Game::default();
     game._type = String::from("xbox");
-    game.id = pkg.full_name.clone();
+    game.id = parsed.identity_name;
     game.name = parsed.display_name;
-    game.path = Some(pkg.install_location.clone());
-
-    game.commands.install = None;
-    game.commands.launch = Some(vec![
-        String::from("explorer.exe"),
-        format!(
-            "shell:AppsFolder\\{}!{}",
-            pkg.family_name, parsed.application_id
-        ),
-    ]);
-    game.commands.uninstall = Some(vec![String::from("__xbox__:remove_package"), pkg.full_name]);
+    game.path = Some(game_path.to_path_buf());
 
     game.state.installed = true;
 
