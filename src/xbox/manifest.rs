@@ -4,7 +4,7 @@ use quick_xml::Reader;
 use std::path::Path;
 
 pub struct ParsedManifest {
-    pub application_id: String,
+    pub identity_name: String,
     pub display_name: String,
 }
 
@@ -19,9 +19,9 @@ pub fn parse(path: &Path) -> Result<ParsedManifest> {
     let mut reader = Reader::from_str(&xml);
     reader.config_mut().trim_text(true);
 
-    let mut application_id = String::new();
+    let mut identity_name = String::new();
     let mut display_name = String::new();
-    let mut current_app_open = false;
+    let mut in_display_name = false;
 
     let mut buf = Vec::new();
     loop {
@@ -29,32 +29,29 @@ pub fn parse(path: &Path) -> Result<ParsedManifest> {
             Ok(Event::Start(e)) => {
                 let name = e.name();
                 let name_bytes = name.as_ref();
-                if name_bytes == b"Application" && application_id.is_empty() {
-                    current_app_open = true;
+                if name_bytes == b"Identity" && identity_name.is_empty() {
                     for attr in e.attributes().flatten() {
-                        if attr.key.as_ref() == b"Id" {
-                            application_id = String::from_utf8_lossy(&attr.value).to_string();
+                        if attr.key.as_ref() == b"Name" {
+                            identity_name = String::from_utf8_lossy(&attr.value).to_string();
                         }
                     }
                 } else if name_bytes == b"DisplayName" && display_name.is_empty() {
-                    // capture text in the next Text event
+                    in_display_name = true;
                 }
             }
             Ok(Event::Empty(e)) => {
                 let name = e.name();
                 let name_bytes = name.as_ref();
-                if name_bytes == b"Application" && application_id.is_empty() {
+                if name_bytes == b"Identity" && identity_name.is_empty() {
                     for attr in e.attributes().flatten() {
-                        if attr.key.as_ref() == b"Id" {
-                            application_id = String::from_utf8_lossy(&attr.value).to_string();
+                        if attr.key.as_ref() == b"Name" {
+                            identity_name = String::from_utf8_lossy(&attr.value).to_string();
                         }
                     }
                 }
             }
             Ok(Event::Text(t)) => {
-                if current_app_open {
-                    // ignore text inside <Application> — we only want attributes
-                } else if display_name.is_empty() {
+                if in_display_name && display_name.is_empty() {
                     let raw = t.decode().unwrap_or_default();
                     let trimmed = raw.trim();
                     if !trimmed.is_empty() {
@@ -63,8 +60,8 @@ pub fn parse(path: &Path) -> Result<ParsedManifest> {
                 }
             }
             Ok(Event::End(e)) => {
-                if e.name().as_ref() == b"Application" {
-                    current_app_open = false;
+                if e.name().as_ref() == b"DisplayName" {
+                    in_display_name = false;
                 }
             }
             Ok(Event::Eof) => break,
@@ -79,15 +76,15 @@ pub fn parse(path: &Path) -> Result<ParsedManifest> {
         buf.clear();
     }
 
-    if application_id.is_empty() {
+    if identity_name.is_empty() {
         return Err(Error::new(
             ErrorKind::InvalidManifest,
-            format!("No <Application Id=\"...\"> found in {}", path.display()),
+            format!("No <Identity Name=\"...\"> found in {}", path.display()),
         ));
     }
 
     Ok(ParsedManifest {
-        application_id,
+        identity_name,
         display_name,
     })
 }
@@ -104,9 +101,10 @@ mod tests {
     }
 
     #[test]
-    fn parse_extracts_application_id_and_display_name() {
+    fn parse_extracts_identity_name_and_display_name() {
         let body = r#"<?xml version="1.0" encoding="utf-8"?>
 <Package>
+  <Identity Name="ForzaHorizon5" />
   <Properties>
     <DisplayName>Forza Horizon 5</DisplayName>
   </Properties>
@@ -116,12 +114,12 @@ mod tests {
 </Package>"#;
         let f = write_manifest(body);
         let parsed = parse(f.path()).unwrap();
-        assert_eq!(parsed.application_id, "Forza");
+        assert_eq!(parsed.identity_name, "ForzaHorizon5");
         assert_eq!(parsed.display_name, "Forza Horizon 5");
     }
 
     #[test]
-    fn parse_returns_error_when_application_missing() {
+    fn parse_returns_error_when_identity_missing() {
         let body = r#"<?xml version="1.0"?><Package><Properties><DisplayName>X</DisplayName></Properties></Package>"#;
         let f = write_manifest(body);
         assert!(parse(f.path()).is_err());
@@ -135,13 +133,10 @@ mod tests {
     }
 
     #[test]
-    fn parse_handles_open_form_application_element() {
-        // <Application Id="X">...</Application> (non-self-closing) must
-        // still surface the Id. The inner content is ignored, so we put
-        // an XML-looking text inside to prove the parser does not mistake
-        // it for DisplayName.
+    fn parse_handles_namespaced_manifest_elements() {
         let body = r#"<?xml version="1.0" encoding="utf-8"?>
-<Package>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10">
+  <Identity Name="MinecraftUWP" />
   <Properties>
     <DisplayName>Minecraft</DisplayName>
   </Properties>
@@ -153,7 +148,7 @@ mod tests {
 </Package>"#;
         let f = write_manifest(body);
         let parsed = parse(f.path()).unwrap();
-        assert_eq!(parsed.application_id, "Minecraft");
+        assert_eq!(parsed.identity_name, "MinecraftUWP");
         assert_eq!(parsed.display_name, "Minecraft");
     }
 }

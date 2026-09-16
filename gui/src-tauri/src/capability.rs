@@ -23,9 +23,12 @@ pub enum Op {
 pub fn supports(launcher: GameType, op: Op) -> bool {
     use GameType::*;
     use Op::*;
+    if launcher == XboxGames && matches!(op, Launch | Uninstall) {
+        return false;
+    }
     matches!(
         (launcher, op),
-        // Every launcher supports list / find / executable / launch.
+        // Every non-Xbox launcher supports list / find / executable / launch.
         (_, List) | (_, Find) | (_, Executable) | (_, Launch)
         // Install: Origin, Steam, Ubisoft.
         | (Origin, Install) | (Steam, Install) | (Ubisoft, Install)
@@ -81,7 +84,7 @@ mod tests {
 
     #[test]
     fn every_launcher_supports_launch() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft] {
             assert!(supports(launcher, Op::Launch), "{:?} should support Launch", launcher);
         }
     }
@@ -164,8 +167,7 @@ mod tests {
 
     // --- Xbox-specific ---
     #[test]
-    fn xbox_supports_uninstall_processes_close() {
-        assert!(supports(XboxGames, Op::Uninstall));
+    fn xbox_supports_processes_and_close_only() {
         assert!(supports(XboxGames, Op::Processes));
         assert!(supports(XboxGames, Op::Close));
     }
@@ -173,16 +175,20 @@ mod tests {
     #[test]
     fn xbox_does_not_support_install() {
         assert!(!supports(XboxGames, Op::Install));
+        assert!(!supports(XboxGames, Op::Launch));
+        assert!(!supports(XboxGames, Op::Uninstall));
     }
 
     #[test]
-    fn matrix_xbox_has_seven_ops() {
+    fn matrix_xbox_has_five_ops() {
         let m = matrix();
         let ops = m.get("xbox").unwrap();
-        assert_eq!(ops.len(), 7);
-        for op in [Op::List, Op::Find, Op::Executable, Op::Launch, Op::Uninstall, Op::Processes, Op::Close] {
+        assert_eq!(ops.len(), 5);
+        for op in [Op::List, Op::Find, Op::Executable, Op::Processes, Op::Close] {
             assert!(ops.contains(&op), "xbox matrix missing {:?}", op);
         }
         assert!(!ops.contains(&Op::Install));
+        assert!(!ops.contains(&Op::Launch));
+        assert!(!ops.contains(&Op::Uninstall));
     }
 }
