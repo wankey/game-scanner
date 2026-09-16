@@ -2,7 +2,7 @@ use std::{io, path::PathBuf};
 
 use neon::{prelude::*, types::JsObject};
 
-use game_scanner::prelude::{Game, GameCommands, GameState};
+use game_scanner::prelude::{Game, GameCommands, GameState, MatchIdentity};
 
 pub fn from_rust<'a>(ctx: &mut FunctionContext<'a>, game: &Game) -> Handle<'a, JsObject> {
     let game_object = JsObject::new(ctx);
@@ -12,6 +12,29 @@ pub fn from_rust<'a>(ctx: &mut FunctionContext<'a>, game: &Game) -> Handle<'a, J
 
     let id = JsString::new(ctx, &game.id);
     game_object.set(ctx, "id", id).unwrap();
+
+    match &game.match_identity {
+        Some(MatchIdentity::Epic { catalog_namespace, catalog_item_id }) => {
+            let identity = JsObject::new(ctx);
+            let kind = ctx.string("epic");
+            identity.set(ctx, "kind", kind).unwrap();
+            let namespace = ctx.string(catalog_namespace);
+            identity
+                .set(ctx, "catalog_namespace", namespace)
+                .unwrap();
+            let item_id = ctx.string(catalog_item_id);
+            identity
+                .set(ctx, "catalog_item_id", item_id)
+                .unwrap();
+            game_object.set(ctx, "match_identity", identity).unwrap();
+        }
+        None => {
+            let value = JsUndefined::new(ctx);
+            game_object
+                .set(ctx, "match_identity", value)
+                .unwrap();
+        }
+    }
 
     let name = JsString::new(ctx, &game.name);
     game_object.set(ctx, "name", name).unwrap();
@@ -235,6 +258,7 @@ pub fn from_js<'a>(ctx: &mut FunctionContext<'a>, object: &JsObject) -> io::Resu
     return Ok(Game {
         _type,
         id,
+        match_identity: None,
         name,
         path,
         commands: GameCommands {

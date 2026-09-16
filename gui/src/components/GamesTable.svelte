@@ -31,31 +31,33 @@
       No games found. Is {LAUNCHER_LABELS[$currentLauncher]} installed?
     </div>
   {:else}
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Id</th>
-          <th>Installed</th>
-          <th>Needs update</th>
-          <th>Downloading</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each $games as game (game.id)}
-          <tr
-            class:selected={$selectedGame?.id === game.id}
-            on:click={() => selectedGame.set(game)}
-          >
-            <td>{game.name}</td>
-            <td class="mono">{game.id}</td>
-            <td>{game.state.installed ? "✅" : "—"}</td>
-            <td>{game.state.needs_update ? "✅" : "—"}</td>
-            <td>{game.state.downloading ? "✅" : "—"}</td>
+    <div class="games-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Id</th>
+            <th>Installed</th>
+            <th>Needs update</th>
+            <th>Downloading</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each $games as game (game.id)}
+            <tr
+              class:selected={$selectedGame?.id === game.id}
+              on:click={() => selectedGame.set(game)}
+            >
+              <td>{game.name}</td>
+              <td class="mono">{game.id}</td>
+              <td>{game.state.installed ? "✅" : "—"}</td>
+              <td>{game.state.needs_update ? "✅" : "—"}</td>
+              <td>{game.state.downloading ? "✅" : "—"}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 </section>
 
@@ -88,10 +90,14 @@
     color: var(--text-muted);
     text-align: center;
   }
+  .games-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
   table {
     width: 100%;
     border-collapse: collapse;
-    overflow-y: auto;
   }
   thead th {
     position: sticky;

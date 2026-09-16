@@ -135,6 +135,7 @@ fn parse_manifest(manifest: &ProductInstall, launcher_executable: &Path) -> Game
     Game {
         _type: GameType::Blizzard.to_string(),
         id: String::from(&manifest.uid),
+        match_identity: None,
         name: get_filename(&game_path),
         path: Some(game_path),
         commands: GameCommands {

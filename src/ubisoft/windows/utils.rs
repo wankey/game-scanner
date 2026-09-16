@@ -88,6 +88,7 @@ pub fn parse_game_info(
     Game {
         _type: GameType::Ubisoft.to_string(),
         id: id.clone(),
+        match_identity: None,
         name: name.clone(),
         path: Some(path.clone()),
         commands: GameCommands {

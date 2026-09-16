@@ -5,10 +5,20 @@ use std::path::PathBuf;
 pub struct Game {
     pub _type: String,
     pub id: String,
+    pub match_identity: Option<MatchIdentity>,
     pub name: String,
     pub path: Option<PathBuf>,
     pub commands: GameCommands,
     pub state: GameState,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum MatchIdentity {
+    Epic {
+        catalog_namespace: String,
+        catalog_item_id: String,
+    },
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]

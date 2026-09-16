@@ -98,6 +98,7 @@ pub fn read(file: &Path, launcher_executable: &Path) -> Result<Game> {
     return Ok(Game {
         _type: GameType::Origin.to_string(),
         id: manifest.id.clone(),
+        match_identity: None,
         name,
         path: Some(PathBuf::from(manifest.dipinstallpath)),
         commands: GameCommands {

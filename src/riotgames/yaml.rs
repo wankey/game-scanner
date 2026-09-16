@@ -133,6 +133,7 @@ pub fn read(file: &Path, launcher_path: &Path) -> Result<Game> {
     return Ok(Game {
         _type: GameType::RiotGames.to_string(),
         id: product.get_code().to_string(),
+        match_identity: None,
         name: product.get_name().to_string(),
         path: Some(game_install_path),
         commands: GameCommands {

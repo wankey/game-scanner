@@ -1,10 +1,17 @@
 export declare interface Game {
     _type: string;
     id: string;
+    match_identity?: MatchIdentity;
     name: string;
     path: string | undefined;
     commands: GameCommands;
     state: GameState;
+}
+
+export declare interface MatchIdentity {
+    kind: "epic";
+    catalog_namespace: string;
+    catalog_item_id: string;
 }
 
 export declare interface GameCommands {

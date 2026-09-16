@@ -57,9 +57,16 @@ export const OP_LABELS: Record<Op, string> = {
   close: "Close",
 };
 
+export type MatchIdentity = {
+  kind: "epic";
+  catalog_namespace: string;
+  catalog_item_id: string;
+};
+
 export interface Game {
   _type: string;
   id: string;
+  match_identity: MatchIdentity | null;
   name: string;
   path: string | null;
   commands: {
