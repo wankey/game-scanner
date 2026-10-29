@@ -11,4 +11,5 @@ pub mod steam;
 pub mod ubisoft;
 pub mod xbox;
 pub mod wegame;
+pub mod hoyoplay;
 mod utils;

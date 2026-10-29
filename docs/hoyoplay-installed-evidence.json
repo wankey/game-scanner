@@ -1,0 +1,610 @@
+{
+  "captured_at": "2026-10-29T18:38:39.066680+08:00",
+  "state_reported_by_user": "installation completed",
+  "gamedata_sha256": "825d20ca578b8a042405f44db571b66f8305b2f8e274c0333248e44726868d21",
+  "warning": "Extracted JSON fragments include history; NOT decoded active key-value records.",
+  "extracted_record_fragments": [
+    {
+      "gameBiz": "hk4e_cn",
+      "installPath": "C:\\Program Files\\miHoYo Launcher\\games\\Genshin Impact Game",
+      "persistentInstallPath": "",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "",
+        "gameExeName": "YuanShen.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "196878752817",
+        "localScenarioConfigPath": "",
+        "packageType": ""
+      }
+    },
+    {
+      "gameBiz": "bh3_cn",
+      "installPath": "C:\\Program Files\\miHoYo Launcher\\games\\Honkai Impact 3rd Game",
+      "persistentInstallPath": "",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "",
+        "gameExeName": "BH3.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36853230407",
+        "localScenarioConfigPath": "",
+        "packageType": ""
+      }
+    },
+    {
+      "gameBiz": "hkrpg_cn",
+      "installPath": "C:\\Program Files\\miHoYo Launcher\\games\\Star Rail Game",
+      "persistentInstallPath": "",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "",
+        "gameExeName": "StarRail.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "157778339326",
+        "localScenarioConfigPath": "",
+        "packageType": ""
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36338481097",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36338481097",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36338481097",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36338481097",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36338481097",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": false,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "104541095378",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "104541095378",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "103188554926",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "102429770318",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "100914071434",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "99917449158",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "99298784512",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "90677511743",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "86304426981",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "71640593031",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "71298146445",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "65124242669",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "61216258656",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "53035640932",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "51769613748",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "43867709964",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "40991124109",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    },
+    {
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "persistentInstallPath": "F:\\ZenlessZoneZero Game",
+      "version": "",
+      "downloading": true,
+      "gameInstallStatus": {
+        "enableBasePackage": "true",
+        "gameExeName": "ZenlessZoneZero.exe",
+        "uapc": ""
+      },
+      "playStatus": {
+        "installTime": "1793260976",
+        "lastPlayTime": ""
+      },
+      "selectPackageInfo": {
+        "fullUnzipSpace": "36338481097",
+        "localScenarioConfigPath": "ZenlessZoneZero_Data\\Persistent\\KBasePackage",
+        "packageType": "BASE"
+      }
+    }
+  ],
+  "config_ini": "[General]\ngame_version=3.3.0\nchannel=1\nsub_channel=1\ncps=hyp_mihoyo\nuapc={\"hyp\":{\"uapc\":\"\"},\"nap_cn\":{\"uapc\":\"\"}}\ndownloading_mode=\nplugin_jQkCL2lMsm_version=3.3.0\n",
+  "root_entries": [
+    "APMCrashReporter",
+    "Audio_Chinese_pkg_version",
+    "GameAssembly.dll",
+    "HoYoKProtect.sys",
+    "UnityCrashHandler64.exe",
+    "UnityPlayer.dll",
+    "WinPixEventRuntime.dll",
+    "ZenlessZoneZero.exe",
+    "ZenlessZoneZero_Data",
+    "amd_ags_x64.dll",
+    "amd_fidelityfx_framegeneration_dx12.dll",
+    "amd_fidelityfx_loader_dx12.dll",
+    "amd_fidelityfx_upscaler_dx12.dll",
+    "config.ini",
+    "file_category_launcher",
+    "libxell.dll",
+    "libxess.dll",
+    "libxess_fg.dll",
+    "mhypbase.dll",
+    "nvngx_dlss.dll",
+    "nvngx_dlssd.dll",
+    "nvngx_dlssg.dll",
+    "pkg_version",
+    "sl.common.dll",
+    "sl.dlss.dll",
+    "sl.dlss_g.dll",
+    "sl.interposer.dll",
+    "sl.nis.dll",
+    "sl.pcl.dll",
+    "sl.reflex.dll",
+    "version_info"
+  ],
+  "configured_executable_exists": true,
+  "sqlite_aggregates": {
+    "chunk_config.db": [
+      [
+        "FfGDa3bsvp",
+        "F:\\ZenlessZoneZero Game",
+        "3.3.0",
+        "3.3.0",
+        "4EEwCYcQ9GWt",
+        "4EEwCYcQ9GWt",
+        20
+      ]
+    ],
+    "chunk.db": [
+      [
+        "FfGDa3bsvp",
+        "F:\\ZenlessZoneZero Game",
+        1,
+        11342
+      ]
+    ]
+  }
+}

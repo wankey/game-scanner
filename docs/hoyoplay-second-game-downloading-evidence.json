@@ -1,0 +1,96 @@
+{
+  "captured_at": "2026-10-29T19:34:47.991917+08:00",
+  "user_reported_state": "second game downloading; first game installed",
+  "games": [
+    {
+      "game_biz": "hkrpg_cn",
+      "root": "F:\\Star Rail Game",
+      "config_ini": "[General]\ngame_version=\nchannel=1\nsub_channel=1\ncps=hyp_mihoyo\nuapc={\"hkrpg_cn\":{\"uapc\":\"\"},\"hyp\":{\"uapc\":\"\"}}\ndownloading_mode=chunk\n",
+      "root_entries": [
+        "StarRail_Data",
+        "UnityCrashHandler64.exe",
+        "UnityPlayer.dll",
+        "chunk",
+        "config.ini",
+        "mhypbase.dll",
+        "pkg_version",
+        "staging"
+      ],
+      "configured_executable": "StarRail.exe",
+      "configured_executable_exists": false,
+      "configured_executable_size": null,
+      "verify_path": "StarRail_Data/Persistent/launcher_verify",
+      "verify_content": null
+    },
+    {
+      "game_biz": "nap_cn",
+      "root": "F:\\ZenlessZoneZero Game",
+      "config_ini": "[General]\ngame_version=3.3.0\nchannel=1\nsub_channel=1\ncps=hyp_mihoyo\nuapc={\"hyp\":{\"uapc\":\"\"},\"nap_cn\":{\"uapc\":\"\"}}\ndownloading_mode=\nplugin_jQkCL2lMsm_version=3.3.0\n",
+      "root_entries": [
+        "APMCrashReporter",
+        "Audio_Chinese_pkg_version",
+        "GameAssembly.dll",
+        "HoYoKProtect.sys",
+        "UnityCrashHandler64.exe",
+        "UnityPlayer.dll",
+        "WinPixEventRuntime.dll",
+        "ZenlessZoneZero.exe",
+        "ZenlessZoneZero_Data",
+        "amd_ags_x64.dll",
+        "amd_fidelityfx_framegeneration_dx12.dll",
+        "amd_fidelityfx_loader_dx12.dll",
+        "amd_fidelityfx_upscaler_dx12.dll",
+        "config.ini",
+        "file_category_launcher",
+        "libxell.dll",
+        "libxess.dll",
+        "libxess_fg.dll",
+        "mhypbase.dll",
+        "nvngx_dlss.dll",
+        "nvngx_dlssd.dll",
+        "nvngx_dlssg.dll",
+        "pkg_version",
+        "sl.common.dll",
+        "sl.dlss.dll",
+        "sl.dlss_g.dll",
+        "sl.interposer.dll",
+        "sl.nis.dll",
+        "sl.pcl.dll",
+        "sl.reflex.dll",
+        "version_info"
+      ],
+      "configured_executable": "ZenlessZoneZero.exe",
+      "configured_executable_exists": true,
+      "configured_executable_size": 10443040,
+      "verify_path": "ZenlessZoneZero_Data/Persistent/file_verify",
+      "verify_content": "{\n    \"game_version\": \"3.3.0\",\n    \"verify_result\": \"success\",\n    \"verify_time\": \"2026-10-29T18:06:26\"\n}\n"
+    }
+  ],
+  "sqlite_aggregates": {
+    "chunk_config.db": [
+      [
+        "FfGDa3bsvp",
+        "F:\\ZenlessZoneZero Game",
+        "3.3.0",
+        "3.3.0",
+        "4EEwCYcQ9GWt",
+        "4EEwCYcQ9GWt",
+        20
+      ]
+    ],
+    "chunk.db": [
+      [
+        "FfGDa3bsvp",
+        "F:\\ZenlessZoneZero Game",
+        1,
+        11342
+      ],
+      [
+        "Je5DM3y6Q2",
+        "F:\\Star Rail Game",
+        1,
+        293
+      ]
+    ]
+  }
+}

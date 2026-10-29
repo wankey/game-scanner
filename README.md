@@ -32,6 +32,7 @@ in [index.d.ts](./node/lib/index.d.ts).
 | Ubisoft    | ❌                                        | ✅       | ❌     | ❌     |
 | Xbox     | ❓                                        | ✅       | ❌     | ❌     |
 | WeGame     | ✅                                        | ✅       | ❌     | ❌     |
+| HoYoPlay   | ✅                                        | ✅       | ❌     | ❌     |
 
 <a name="multi-directories"></a>[1]: **Multi-directories**: is different game install locations (e.g., folders, and
 drivers).
@@ -50,6 +51,7 @@ drivers).
 | Ubisoft    | ✅       | ✅      | ✅         |
 | Xbox     | ❌       | ❌      | ❌         |
 | WeGame     | ❌       | ❌      | ❌         |
+| HoYoPlay   | ❌       | ❌      | ❌         |
 
 ### Game State support
 
@@ -65,6 +67,7 @@ drivers).
 | Ubisoft    | ❌         | ❌            | ❌           | ❌           | ❌              |
 | Xbox     | ❌         | ❌            | ❌           | ❌           | ❌              |
 | WeGame     | ✅         | ❌            | ❌           | ❌           | ❌              |
+| HoYoPlay   | ✅         | ❌            | ✅           | ❌           | ❌              |
 
 ### Operations
 
@@ -80,6 +83,7 @@ drivers).
 | Ubisoft    | ✅          | ✅                       | ✅                      |
 | Xbox     | ✅          | ✅                       | ✅                      |
 | WeGame     | ✅          | ✅                       | ✅                      |
+| HoYoPlay   | ✅          | ✅                       | ✅                      |
 
 <a name="find-game"></a>[1]: **Find Game**: you can find for a specific game passing only the `id`.
 
@@ -97,6 +101,7 @@ drivers).
 | Ubisoft    | ✅      | ❓             | ❓     |
 | Xbox     | ❌      | ✅             | ✅     |
 | WeGame     | ❌      | ❌             | ❌     |
+| HoYoPlay   | ❌      | ❌             | ❌     |
 
 <a name="get-processes"></a>[1]: **Game Processes**: return a list with all `Id` or `PID` of processes from a specific
 game.
@@ -109,6 +114,8 @@ game.
     - rustc >= v1.49.0
 
 WeGame detects registered installed Rail games on Windows. Download/update state and game commands are unsupported. See [WeGame details](./docs/wegame.md).
+
+HoYoPlay detects registered Windows CN installations and current downloads (currently nap_cn/hkrpg_cn). Installation coverage and pending validation are documented in [HoYoPlay details](./docs/hoyoplay.md).
 
 ## NodeJS Binding
 

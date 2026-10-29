@@ -11,7 +11,8 @@ export type GameType =
   | "steam"
   | "ubisoft"
   | "xbox"
-  | "wegame";
+  | "wegame"
+  | "hoyoplay";
 
 export const ALL_GAME_TYPES: GameType[] = [
   "amazongames",
@@ -24,6 +25,7 @@ export const ALL_GAME_TYPES: GameType[] = [
   "ubisoft",
   "xbox",
   "wegame",
+  "hoyoplay",
 ];
 
 export const LAUNCHER_LABELS: Record<GameType, string> = {
@@ -37,6 +39,7 @@ export const LAUNCHER_LABELS: Record<GameType, string> = {
   ubisoft: "Ubisoft",
   xbox: "Xbox / Microsoft Store",
   wegame: "WeGame",
+  hoyoplay: "米哈游启动器 / HoYoPlay",
 };
 
 export type Op =

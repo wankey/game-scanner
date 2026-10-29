@@ -1,0 +1,25 @@
+{
+  "captured_at": "2026-10-29T20:31:43.988298+08:00",
+  "format": "MMKV unencrypted v4, flags=0",
+  "metadata_version": 4,
+  "effective_size": 24095,
+  "crc32_verified": true,
+  "source_sha256": "f3a86b58a26043f82109c152cd4a744f76b3542516ee864390a1cf7b71252bec",
+  "active_records": [
+    {
+      "key": "hkrpg_cn",
+      "gameBiz": "hkrpg_cn",
+      "installPath": "F:\\Star Rail Game",
+      "downloading": true,
+      "version": ""
+    },
+    {
+      "key": "nap_cn",
+      "gameBiz": "nap_cn",
+      "installPath": "F:\\ZenlessZoneZero Game",
+      "downloading": false,
+      "version": ""
+    }
+  ],
+  "note": "Current keys decoded in order with replacement/tombstone semantics; bytes outside effective size ignored. No raw account data included."
+}

@@ -109,3 +109,10 @@ export declare const wegame: {
     find(id: string): Game;
     games(): Array<Game>;
 };
+
+/** Windows CN registered installations/downloads (nap_cn/hkrpg_cn); backend errors throw. */
+export declare const hoyoplay: {
+    executable(): string;
+    find(id: string): Game;
+    games(): Array<Game>;
+};

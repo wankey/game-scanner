@@ -1081,6 +1081,7 @@ dependencies = [
  "bytes",
  "case",
  "chrono",
+ "crc32fast",
  "criterion",
  "directories",
  "prost",
