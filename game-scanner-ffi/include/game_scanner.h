@@ -24,7 +24,7 @@ extern "C" {
 void gs_free(char *s);
 
 /* List games for `launcher` ("steam", "epicgames", "gog", "blizzard",
- * "ubisoft", "amazongames", "origin", "riotgames", "xbox"). */
+ * "ubisoft", "amazongames", "origin", "riotgames", "xbox", "wegame"). */
 int gs_list(const char *launcher, char **out);
 
 /* Find one game by launcher-specific id (e.g. a Steam app id). */

@@ -1,6 +1,6 @@
 use neon::prelude::*;
 
-use crate::types::{amazon, blizzard, epicgames, gog, origin, riotgames, steam, ubisoft};
+use crate::types::{amazon, blizzard, epicgames, gog, origin, riotgames, steam, ubisoft, wegame};
 
 mod manager;
 mod types;
@@ -17,6 +17,7 @@ fn main(mut context: ModuleContext) -> NeonResult<()> {
     riotgames::init(&mut context);
     steam::init(&mut context);
     ubisoft::init(&mut context);
+    wegame::init(&mut context)?;
 
     Ok(())
 }

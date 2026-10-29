@@ -51,8 +51,8 @@
               <td>{game.name}</td>
               <td class="mono">{game.id}</td>
               <td>{game.state.installed ? "✅" : "—"}</td>
-              <td>{game.state.needs_update ? "✅" : "—"}</td>
-              <td>{game.state.downloading ? "✅" : "—"}</td>
+              <td>{game._type === "wegame" ? "Not supported" : game.state.needs_update ? "✅" : "—"}</td>
+              <td>{game._type === "wegame" ? "Not supported" : game.state.downloading ? "✅" : "—"}</td>
             </tr>
           {/each}
         </tbody>

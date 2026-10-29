@@ -10,4 +10,5 @@ pub mod riotgames;
 pub mod steam;
 pub mod ubisoft;
 pub mod xbox;
+pub mod wegame;
 mod utils;

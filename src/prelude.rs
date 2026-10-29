@@ -48,6 +48,7 @@ pub enum GameType {
     Steam,
     Ubisoft,
     XboxGames,
+    WeGame,
 }
 
 impl GameType {
@@ -62,6 +63,7 @@ impl GameType {
             Self::Steam => "steam",
             Self::Ubisoft => "ubisoft",
             Self::XboxGames => "xbox",
+            Self::WeGame => "wegame",
         }
         .to_string()
     }
@@ -79,6 +81,7 @@ impl From<String> for GameType {
             "steam" => Self::Steam,
             "ubisoft" => Self::Ubisoft,
             "xbox" => Self::XboxGames,
+            "wegame" => Self::WeGame,
             _ => panic!("invalid game type"),
         }
     }

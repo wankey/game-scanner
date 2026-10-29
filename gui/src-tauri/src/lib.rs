@@ -9,15 +9,19 @@ use game_scanner::prelude::Game;
 /// because `game_scanner::prelude::GameType` does not implement
 /// `Deserialize` and the `error` module is private.
 #[tauri::command]
-fn list_games(launcher: String) -> Result<Vec<Game>, String> {
+async fn list_games(launcher: String) -> Result<Vec<Game>, String> {
     let parsed = commands::parse_launcher(&launcher);
-    commands::list_games(parsed)
+    tauri::async_runtime::spawn_blocking(move || commands::list_games(parsed))
+        .await
+        .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
-fn find_game(launcher: String, id: String) -> Result<Game, String> {
+async fn find_game(launcher: String, id: String) -> Result<Game, String> {
     let parsed = commands::parse_launcher(&launcher);
-    commands::find_game(parsed, &id)
+    tauri::async_runtime::spawn_blocking(move || commands::find_game(parsed, &id))
+        .await
+        .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]

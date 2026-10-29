@@ -10,7 +10,8 @@ export type GameType =
   | "riotgames"
   | "steam"
   | "ubisoft"
-  | "xbox";
+  | "xbox"
+  | "wegame";
 
 export const ALL_GAME_TYPES: GameType[] = [
   "amazongames",
@@ -22,6 +23,7 @@ export const ALL_GAME_TYPES: GameType[] = [
   "steam",
   "ubisoft",
   "xbox",
+  "wegame",
 ];
 
 export const LAUNCHER_LABELS: Record<GameType, string> = {
@@ -34,6 +36,7 @@ export const LAUNCHER_LABELS: Record<GameType, string> = {
   steam: "Steam",
   ubisoft: "Ubisoft",
   xbox: "Xbox / Microsoft Store",
+  wegame: "WeGame",
 };
 
 export type Op =

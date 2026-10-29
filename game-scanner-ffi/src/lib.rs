@@ -10,7 +10,7 @@
 //! The `launcher` argument is the snake-case name used by
 //! `game_scanner::prelude::GameType::to_string`:
 //! `amazongames`, `blizzard`, `epicgames`, `gog`, `origin`,
-//! `riotgames`, `steam`, `ubisoft`, `xbox`.
+//! `riotgames`, `steam`, `ubisoft`, `xbox`, `wegame`.
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -18,7 +18,7 @@ use std::os::raw::c_char;
 use game_scanner::{
     amazon, blizzard, epicgames, gog, origin,
     prelude::{Game, GameType},
-    riotgames, steam, ubisoft, xbox,
+    riotgames, steam, ubisoft, wegame, xbox,
 };
 
 /// Releases a string previously returned by this library.
@@ -43,6 +43,7 @@ fn parse_launcher(name: &str) -> Option<GameType> {
         "steam" => GameType::Steam,
         "ubisoft" => GameType::Ubisoft,
         "xbox" => GameType::XboxGames,
+        "wegame" => GameType::WeGame,
         _ => return None,
     })
 }
@@ -64,6 +65,7 @@ pub extern "C" fn gs_list(launcher: *const c_char, out: *mut *mut c_char) -> i32
         GameType::Steam => steam::games(),
         GameType::Ubisoft => ubisoft::games(),
         GameType::XboxGames => xbox::games(),
+        GameType::WeGame => wegame::games(),
     };
 
     match raw {
@@ -93,6 +95,7 @@ pub extern "C" fn gs_find(
         GameType::Steam => steam::find(&id),
         GameType::Ubisoft => ubisoft::find(&id),
         GameType::XboxGames => xbox::find(&id),
+        GameType::WeGame => wegame::find(&id),
     };
 
     match raw {
@@ -117,6 +120,7 @@ pub extern "C" fn gs_executable(launcher: *const c_char, out: *mut *mut c_char) 
         GameType::Steam => steam::executable(),
         GameType::Ubisoft => ubisoft::executable(),
         GameType::XboxGames => xbox::executable(),
+        GameType::WeGame => wegame::executable(),
     };
 
     match raw {
@@ -246,7 +250,7 @@ mod tests {
         // The GameType names map to themselves via to_string/from.
         for name in [
             "amazongames", "blizzard", "epicgames", "gog",
-            "origin", "riotgames", "steam", "ubisoft", "xbox",
+            "origin", "riotgames", "steam", "ubisoft", "xbox", "wegame",
         ] {
             let l = parse_launcher(name).unwrap();
             assert_eq!(l.to_string(), name);
@@ -257,6 +261,18 @@ mod tests {
     fn parse_launcher_unknown_returns_none() {
         assert!(parse_launcher("nope").is_none());
         assert!(parse_launcher("Steam").is_none()); // case-sensitive
+    }
+
+    #[test]
+    fn wegame_invalid_id_returns_backend_error_json() {
+        let launcher = CString::new("wegame").unwrap();
+        let id = CString::new("invalid").unwrap();
+        let mut out = std::ptr::null_mut();
+        assert_eq!(gs_find(launcher.as_ptr(), id.as_ptr(), &mut out), 2);
+        let text = unsafe { CStr::from_ptr(out) }.to_str().unwrap();
+        let value: serde_json::Value = serde_json::from_str(text).unwrap();
+        assert!(value["error"].as_str().unwrap().contains("positive decimal"));
+        gs_free(out);
     }
 
     #[test]

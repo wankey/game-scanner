@@ -23,6 +23,9 @@ pub enum Op {
 pub fn supports(launcher: GameType, op: Op) -> bool {
     use GameType::*;
     use Op::*;
+    if launcher == WeGame {
+        return matches!(op, List | Find | Executable);
+    }
     if launcher == XboxGames && matches!(op, Launch | Uninstall) {
         return false;
     }
@@ -48,7 +51,7 @@ pub fn matrix() -> HashMap<String, Vec<Op>> {
     use GameType::*;
     let all_ops = [Op::List, Op::Find, Op::Executable, Op::Install, Op::Launch, Op::Uninstall, Op::Processes, Op::Close];
     let mut out = HashMap::new();
-    for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
+    for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames, WeGame] {
         let ops = all_ops.iter().copied().filter(|op| supports(launcher, *op)).collect();
         out.insert(launcher.to_string(), ops);
     }
@@ -60,24 +63,33 @@ mod tests {
     use super::*;
     use GameType::*;
 
+    #[test]
+    fn wegame_supports_only_detection() {
+        let m = matrix();
+        assert_eq!(m.get("wegame").unwrap(), &[Op::List, Op::Find, Op::Executable]);
+        for op in [Op::Install, Op::Launch, Op::Uninstall, Op::Processes, Op::Close] {
+            assert!(!supports(WeGame, op));
+        }
+    }
+
     // --- Every launcher: list / find / executable / launch ---
     #[test]
     fn every_launcher_supports_list() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames, WeGame] {
             assert!(supports(launcher, Op::List), "{:?} should support List", launcher);
         }
     }
 
     #[test]
     fn every_launcher_supports_find() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames, WeGame] {
             assert!(supports(launcher, Op::Find), "{:?} should support Find", launcher);
         }
     }
 
     #[test]
     fn every_launcher_supports_executable() {
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames, WeGame] {
             assert!(supports(launcher, Op::Executable), "{:?} should support Executable", launcher);
         }
     }
@@ -138,13 +150,13 @@ mod tests {
 
     // --- Matrix shape ---
     #[test]
-    fn matrix_contains_all_nine_launchers() {
+    fn matrix_contains_all_ten_launchers() {
         let m = matrix();
-        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames] {
+        for launcher in [AmazonGames, Blizzard, EpicGames, GOG, Origin, RiotGames, Steam, Ubisoft, XboxGames, WeGame] {
             let key = launcher.to_string();
             assert!(m.contains_key(&key), "matrix missing {:?}", launcher);
         }
-        assert_eq!(m.len(), 9);
+        assert_eq!(m.len(), 10);
     }
 
     #[test]

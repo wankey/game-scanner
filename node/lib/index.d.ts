@@ -102,3 +102,10 @@ export declare const ubisoft: {
 
     games(): Array<Game>;
 }
+
+/** Windows registered Rail games; backend errors throw. */
+export declare const wegame: {
+    executable(): string;
+    find(id: string): Game;
+    games(): Array<Game>;
+};

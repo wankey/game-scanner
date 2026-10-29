@@ -31,6 +31,7 @@ in [index.d.ts](./node/lib/index.d.ts).
 | Steam      | ✅                                        | ✅       | ❌     | ✅     |
 | Ubisoft    | ❌                                        | ✅       | ❌     | ❌     |
 | Xbox     | ❓                                        | ✅       | ❌     | ❌     |
+| WeGame     | ✅                                        | ✅       | ❌     | ❌     |
 
 <a name="multi-directories"></a>[1]: **Multi-directories**: is different game install locations (e.g., folders, and
 drivers).
@@ -48,6 +49,7 @@ drivers).
 | Steam      | ✅       | ✅      | ✅         |
 | Ubisoft    | ✅       | ✅      | ✅         |
 | Xbox     | ❌       | ❌      | ❌         |
+| WeGame     | ❌       | ❌      | ❌         |
 
 ### Game State support
 
@@ -62,6 +64,7 @@ drivers).
 | Steam      | ✅         | ✅            | ✅           | ✅           | ✅              |
 | Ubisoft    | ❌         | ❌            | ❌           | ❌           | ❌              |
 | Xbox     | ❌         | ❌            | ❌           | ❌           | ❌              |
+| WeGame     | ✅         | ❌            | ❌           | ❌           | ❌              |
 
 ### Operations
 
@@ -76,6 +79,7 @@ drivers).
 | Steam      | ✅          | ✅                       | ✅                      |
 | Ubisoft    | ✅          | ✅                       | ✅                      |
 | Xbox     | ✅          | ✅                       | ✅                      |
+| WeGame     | ✅          | ✅                       | ✅                      |
 
 <a name="find-game"></a>[1]: **Find Game**: you can find for a specific game passing only the `id`.
 
@@ -92,6 +96,7 @@ drivers).
 | Steam      | ✅      | ✅             | ✅     |
 | Ubisoft    | ✅      | ❓             | ❓     |
 | Xbox     | ❌      | ✅             | ✅     |
+| WeGame     | ❌      | ❌             | ❌     |
 
 <a name="get-processes"></a>[1]: **Game Processes**: return a list with all `Id` or `PID` of processes from a specific
 game.
@@ -102,6 +107,8 @@ game.
     - cargo >= v1.49.0
     - rustup >= v1.23.1
     - rustc >= v1.49.0
+
+WeGame detects registered installed Rail games on Windows. Download/update state and game commands are unsupported. See [WeGame details](./docs/wegame.md).
 
 ## NodeJS Binding
 

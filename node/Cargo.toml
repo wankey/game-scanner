@@ -11,3 +11,6 @@ crate-type = ["cdylib"]
 [dependencies]
 neon = { version = "0.10.1", default-features = false, features = ["napi-5"] }
 game-scanner = { version = "*", path = "../" }
+
+# Build the Node addon independently from the core/GUI workspace.
+[workspace]
