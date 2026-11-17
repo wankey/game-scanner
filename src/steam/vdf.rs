@@ -15,11 +15,14 @@ pub fn read_library_folders(file: &Path) -> Result<Vec<PathBuf>> {
         )
     })?;
 
-    let library_folders = library_folders_data.split("\n").collect::<Vec<&str>>();
+    Ok(parse_library_folders(&library_folders_data))
+}
 
+/// `lines()` strips `\r\n` too, so CRLF files do not yield paths ending in `\r`.
+fn parse_library_folders(library_folders_data: &str) -> Vec<PathBuf> {
     let mut folders = Vec::new();
 
-    for file_line in library_folders {
+    for file_line in library_folders_data.lines() {
         let line: Vec<&str> = file_line
             .split("\t")
             .filter(|str| str.trim().len() != 0)
@@ -29,8 +32,8 @@ pub fn read_library_folders(file: &Path) -> Result<Vec<PathBuf>> {
             continue;
         }
 
-        let attr = remove_quotes(line.get(0).unwrap());
-        let mut value = remove_quotes(line.get(1).unwrap());
+        let attr = remove_quotes(line[0].trim());
+        let mut value = remove_quotes(line[1].trim());
 
         match attr.as_str() {
             "path" => {
@@ -48,5 +51,24 @@ pub fn read_library_folders(file: &Path) -> Result<Vec<PathBuf>> {
         }
     }
 
-    return Ok(folders);
+    folders
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn crlf_library_paths_have_no_trailing_carriage_return() {
+        let text = concat!(
+            "\"libraryfolders\"\r\n{\r\n",
+            "\t\"0\"\r\n\t{\r\n",
+            "\t\t\"path\"\t\t\"D:\\360Downloads\"\r\n",
+            "\t}\r\n}\r\n",
+        );
+        let folders = parse_library_folders(text);
+        assert_eq!(folders.len(), 1);
+        assert!(!folders[0].to_string_lossy().ends_with('\r'));
+        assert!(folders[0].to_string_lossy().ends_with("360Downloads"));
+    }
 }

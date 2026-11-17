@@ -18,12 +18,16 @@ pub fn read(file: &Path, launcher_executable: &Path, library_path: &Path) -> Res
         )
     })?;
 
-    let manifest = manifest_data.split("\n").collect::<Vec<&str>>();
+    parse(&manifest_data, launcher_executable, library_path)
+}
 
+/// Parses manifest text. `lines()` strips both `\n` and `\r\n`, so manifests
+/// saved with Windows line endings do not leak `\r` into values.
+fn parse(manifest_data: &str, launcher_executable: &Path, library_path: &Path) -> Result<Game> {
     let mut game = Game::default();
     game._type = String::from("steam");
 
-    for file_line in manifest {
+    for file_line in manifest_data.lines() {
         let line = file_line
             .split("\t")
             .filter(|str| !str.trim().is_empty())
@@ -33,14 +37,15 @@ pub fn read(file: &Path, launcher_executable: &Path, library_path: &Path) -> Res
             continue;
         }
 
-        let attr = remove_quotes(line.get(0).unwrap());
-        let value = remove_quotes(line.get(1).unwrap());
+        let attr = remove_quotes(line[0].trim());
+        let value = remove_quotes(line[1].trim());
 
         match attr.as_str() {
             "appid" => game.id = value,
             "name" => game.name = value,
             "StateFlags" => {
-                let state = value.parse::<i64>().unwrap();
+                // A malformed value leaves the default (not installed) state.
+                let Ok(state) = value.parse::<i64>() else { continue };
 
                 game.state.installed = has_app_state(state, SteamAppState::FullyInstalled);
 
@@ -49,7 +54,7 @@ pub fn read(file: &Path, launcher_executable: &Path, library_path: &Path) -> Res
                 game.state.downloading = has_app_state(state, SteamAppState::Downloading);
             }
             "UpdateResult" => {
-                let state = value.parse::<i64>().unwrap();
+                let Ok(state) = value.parse::<i64>() else { continue };
 
                 if game.state.needs_update && !game.state.downloading {
                     game.state.downloading =
@@ -111,4 +116,42 @@ fn has_update_result(state: i64, flag: SteamUpdateResult) -> bool {
     }
 
     (state & flag.get_code()) == flag.get_code()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const MANIFEST: &str = concat!(
+        "\"AppState\"\n{\n",
+        "\t\"appid\"\t\t\"489830\"\n",
+        "\t\"name\"\t\t\"The Elder Scrolls V: Skyrim Special Edition\"\n",
+        "\t\"StateFlags\"\t\t\"4\"\n",
+        "\t\"installdir\"\t\t\"Skyrim Special Edition\"\n",
+        "\t\"UpdateResult\"\t\t\"0\"\n",
+        "}\n",
+    );
+
+    fn parse_text(text: &str) -> Game {
+        parse(text, Path::new("steam.exe"), Path::new("D:/lib/steamapps")).unwrap()
+    }
+
+    #[test]
+    fn crlf_manifest_parses_like_lf() {
+        let game = parse_text(&MANIFEST.replace('\n', "\r\n"));
+        assert_eq!(game.id, "489830");
+        assert_eq!(game.name, "The Elder Scrolls V: Skyrim Special Edition");
+        assert!(game.state.installed);
+        assert_eq!(
+            game.path,
+            Some(PathBuf::from("D:/lib/steamapps").join("common").join("Skyrim Special Edition"))
+        );
+    }
+
+    #[test]
+    fn malformed_state_flags_do_not_panic() {
+        let game = parse_text(&MANIFEST.replace("\"4\"", "\"four\""));
+        assert_eq!(game.id, "489830");
+        assert!(!game.state.installed);
+    }
 }
