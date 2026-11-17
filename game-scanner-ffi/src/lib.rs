@@ -53,27 +53,29 @@ fn parse_launcher(name: &str) -> Option<GameType> {
 /// (or `{"error": "..."}` on backend failure) into `*out`.
 #[no_mangle]
 pub extern "C" fn gs_list(launcher: *const c_char, out: *mut *mut c_char) -> i32 {
-    let Some(name) = read_str(launcher) else { return bad_input(out, "launcher is null or invalid UTF-8"); };
-    let Some(l) = parse_launcher(&name) else { return bad_input(out, &format!("unknown launcher: {name}")); };
+    guard(out, move || {
+        let Some(name) = read_str(launcher) else { return bad_input(out, "launcher is null or invalid UTF-8"); };
+        let Some(l) = parse_launcher(&name) else { return bad_input(out, &format!("unknown launcher: {name}")); };
 
-    let raw: Result<Vec<Game>, _> = match l {
-        GameType::AmazonGames => amazon::games(),
-        GameType::Blizzard => blizzard::games(),
-        GameType::EpicGames => epicgames::games(),
-        GameType::GOG => gog::games(),
-        GameType::Origin => origin::games(),
-        GameType::RiotGames => riotgames::games(),
-        GameType::Steam => steam::games(),
-        GameType::Ubisoft => ubisoft::games(),
-        GameType::XboxGames => xbox::games(),
-        GameType::WeGame => wegame::games(),
-        GameType::HoYoPlay => hoyoplay::games(),
-    };
+        let raw: Result<Vec<Game>, _> = match l {
+            GameType::AmazonGames => amazon::games(),
+            GameType::Blizzard => blizzard::games(),
+            GameType::EpicGames => epicgames::games(),
+            GameType::GOG => gog::games(),
+            GameType::Origin => origin::games(),
+            GameType::RiotGames => riotgames::games(),
+            GameType::Steam => steam::games(),
+            GameType::Ubisoft => ubisoft::games(),
+            GameType::XboxGames => xbox::games(),
+            GameType::WeGame => wegame::games(),
+            GameType::HoYoPlay => hoyoplay::games(),
+        };
 
-    match raw {
-        Ok(games) => write_json(out, &games),
-        Err(e) => write_err(out, &e.to_string()),
-    }
+        match raw {
+            Ok(games) => write_json(out, &games),
+            Err(e) => write_err(out, &e.to_string()),
+        }
+    })
 }
 
 /// Looks up a single game by launcher-specific id (e.g. a Steam app id).
@@ -83,89 +85,101 @@ pub extern "C" fn gs_find(
     id: *const c_char,
     out: *mut *mut c_char,
 ) -> i32 {
-    let Some(name) = read_str(launcher) else { return bad_input(out, "launcher is null or invalid UTF-8"); };
-    let Some(l) = parse_launcher(&name) else { return bad_input(out, &format!("unknown launcher: {name}")); };
-    let Some(id) = read_str(id) else { return bad_input(out, "id is null or invalid UTF-8"); };
+    guard(out, move || {
+        let Some(name) = read_str(launcher) else { return bad_input(out, "launcher is null or invalid UTF-8"); };
+        let Some(l) = parse_launcher(&name) else { return bad_input(out, &format!("unknown launcher: {name}")); };
+        let Some(id) = read_str(id) else { return bad_input(out, "id is null or invalid UTF-8"); };
 
-    let raw: Result<Game, _> = match l {
-        GameType::AmazonGames => amazon::find(&id),
-        GameType::Blizzard => blizzard::find(&id),
-        GameType::EpicGames => epicgames::find(&id),
-        GameType::GOG => gog::find(&id),
-        GameType::Origin => origin::find(&id),
-        GameType::RiotGames => riotgames::find(&id),
-        GameType::Steam => steam::find(&id),
-        GameType::Ubisoft => ubisoft::find(&id),
-        GameType::XboxGames => xbox::find(&id),
-        GameType::WeGame => wegame::find(&id),
-        GameType::HoYoPlay => hoyoplay::find(&id),
-    };
+        let raw: Result<Game, _> = match l {
+            GameType::AmazonGames => amazon::find(&id),
+            GameType::Blizzard => blizzard::find(&id),
+            GameType::EpicGames => epicgames::find(&id),
+            GameType::GOG => gog::find(&id),
+            GameType::Origin => origin::find(&id),
+            GameType::RiotGames => riotgames::find(&id),
+            GameType::Steam => steam::find(&id),
+            GameType::Ubisoft => ubisoft::find(&id),
+            GameType::XboxGames => xbox::find(&id),
+            GameType::WeGame => wegame::find(&id),
+            GameType::HoYoPlay => hoyoplay::find(&id),
+        };
 
-    match raw {
-        Ok(g) => write_json(out, &g),
-        Err(e) => write_err(out, &e.to_string()),
-    }
+        match raw {
+            Ok(g) => write_json(out, &g),
+            Err(e) => write_err(out, &e.to_string()),
+        }
+    })
 }
 
 /// Returns the path to the launcher's executable (or `{"error": "..."}`).
 #[no_mangle]
 pub extern "C" fn gs_executable(launcher: *const c_char, out: *mut *mut c_char) -> i32 {
-    let Some(name) = read_str(launcher) else { return bad_input(out, "launcher is null or invalid UTF-8"); };
-    let Some(l) = parse_launcher(&name) else { return bad_input(out, &format!("unknown launcher: {name}")); };
+    guard(out, move || {
+        let Some(name) = read_str(launcher) else { return bad_input(out, "launcher is null or invalid UTF-8"); };
+        let Some(l) = parse_launcher(&name) else { return bad_input(out, &format!("unknown launcher: {name}")); };
 
-    let raw: Result<std::path::PathBuf, _> = match l {
-        GameType::AmazonGames => amazon::executable(),
-        GameType::Blizzard => blizzard::executable(),
-        GameType::EpicGames => epicgames::executable(),
-        GameType::GOG => gog::executable(),
-        GameType::Origin => origin::executable(),
-        GameType::RiotGames => riotgames::executable(),
-        GameType::Steam => steam::executable(),
-        GameType::Ubisoft => ubisoft::executable(),
-        GameType::XboxGames => xbox::executable(),
-        GameType::WeGame => wegame::executable(),
-        GameType::HoYoPlay => hoyoplay::executable(),
-    };
+        let raw: Result<std::path::PathBuf, _> = match l {
+            GameType::AmazonGames => amazon::executable(),
+            GameType::Blizzard => blizzard::executable(),
+            GameType::EpicGames => epicgames::executable(),
+            GameType::GOG => gog::executable(),
+            GameType::Origin => origin::executable(),
+            GameType::RiotGames => riotgames::executable(),
+            GameType::Steam => steam::executable(),
+            GameType::Ubisoft => ubisoft::executable(),
+            GameType::XboxGames => xbox::executable(),
+            GameType::WeGame => wegame::executable(),
+            GameType::HoYoPlay => hoyoplay::executable(),
+        };
 
-    match raw {
-        Ok(p) => write_json(out, &p.to_string_lossy().into_owned()),
-        Err(e) => write_err(out, &e.to_string()),
-    }
+        match raw {
+            Ok(p) => write_json(out, &p.to_string_lossy().into_owned()),
+            Err(e) => write_err(out, &e.to_string()),
+        }
+    })
 }
 
 /// Installs the game described by the supplied JSON `Game`.
 #[no_mangle]
 pub extern "C" fn gs_install(game_json: *const c_char, out: *mut *mut c_char) -> i32 {
-    run_manager_op("install_game", game_json, out, |g| {
-        let raw: Result<(), _> = game_scanner::manager::install_game(g);
-        raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+    guard(out, move || {
+        run_manager_op("install_game", game_json, out, |g| {
+            let raw: Result<(), _> = game_scanner::manager::install_game(g);
+            raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+        })
     })
 }
 
 /// Uninstalls the game described by the supplied JSON `Game`.
 #[no_mangle]
 pub extern "C" fn gs_uninstall(game_json: *const c_char, out: *mut *mut c_char) -> i32 {
-    run_manager_op("uninstall_game", game_json, out, |g| {
-        let raw: Result<(), _> = game_scanner::manager::uninstall_game(g);
-        raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+    guard(out, move || {
+        run_manager_op("uninstall_game", game_json, out, |g| {
+            let raw: Result<(), _> = game_scanner::manager::uninstall_game(g);
+            raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+        })
     })
 }
 
 /// Launches the game described by the supplied JSON `Game`.
 #[no_mangle]
 pub extern "C" fn gs_launch(game_json: *const c_char, out: *mut *mut c_char) -> i32 {
-    run_manager_op("launch_game", game_json, out, |g| {
-        let raw: Result<(), _> = game_scanner::manager::launch_game(g);
-        raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+    guard(out, move || {
+        run_manager_op("launch_game", game_json, out, |g| {
+            let raw: Result<(), _> = game_scanner::manager::launch_game(g);
+            raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+        })
     })
 }
 
 /// Closes the running game described by the supplied JSON `Game`.
 #[no_mangle]
 pub extern "C" fn gs_close(game_json: *const c_char, out: *mut *mut c_char) -> i32 {
-    run_manager_op("close_game", game_json, out, |g| {
-        let raw: Result<(), _> = game_scanner::manager::close_game(g);
-        raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+    guard(out, move || {
+        run_manager_op("close_game", game_json, out, |g| {
+            let raw: Result<(), _> = game_scanner::manager::close_game(g);
+            raw.map_err(|e| e.to_string()).map(|()| serde_json::json!(null))
+        })
     })
 }
 
@@ -173,13 +187,33 @@ pub extern "C" fn gs_close(game_json: *const c_char, out: *mut *mut c_char) -> i
 /// the launcher cannot introspect its processes (Steam can, others cannot).
 #[no_mangle]
 pub extern "C" fn gs_get_processes(game_json: *const c_char, out: *mut *mut c_char) -> i32 {
-    run_manager_op("get_processes", game_json, out, |g| {
-        Ok(serde_json::to_value(game_scanner::manager::get_processes(g))
-            .unwrap_or(serde_json::Value::Null))
+    guard(out, move || {
+        run_manager_op("get_processes", game_json, out, |g| {
+            Ok(serde_json::to_value(game_scanner::manager::get_processes(g))
+                .unwrap_or(serde_json::Value::Null))
+        })
     })
 }
 
 // ──────────────────────────── helpers ────────────────────────────
+
+/// Runs an exported operation without letting a Rust panic unwind into the
+/// caller. Hosts load this library in-process, so a panic in a launcher parser
+/// must become an error status instead of aborting the host process.
+fn guard<F: FnOnce() -> i32>(out: *mut *mut c_char, f: F) -> i32 {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
+        Ok(rc) => rc,
+        Err(payload) => {
+            let msg = payload
+                .downcast_ref::<&str>()
+                .map(|s| s.to_string())
+                .or_else(|| payload.downcast_ref::<String>().cloned())
+                .unwrap_or_else(|| "unknown panic".to_string());
+            let _ = write_err(out, &format!("internal panic: {msg}"));
+            1
+        }
+    }
+}
 
 fn read_str(p: *const c_char) -> Option<String> {
     if p.is_null() {
@@ -221,7 +255,7 @@ fn write_json<T: serde::Serialize>(out: *mut *mut c_char, v: &T) -> i32 {
         Ok(s) => {
             match CString::new(s) {
                 Ok(cs) => {
-                    unsafe { *out = CString::into_raw(cs); }
+                    store(out, cs);
                     0
                 }
                 Err(_) => 1,
@@ -234,10 +268,17 @@ fn write_json<T: serde::Serialize>(out: *mut *mut c_char, v: &T) -> i32 {
 fn write_err(out: *mut *mut c_char, msg: &str) -> i32 {
     let body = serde_json::json!({ "error": msg }).to_string();
     if let Ok(cs) = CString::new(body) {
-        unsafe { *out = CString::into_raw(cs); }
+        store(out, cs);
         2
     } else {
         1
+    }
+}
+
+/// Hands `cs` to the caller, or drops it when the caller passed no out slot.
+fn store(out: *mut *mut c_char, cs: CString) {
+    if !out.is_null() {
+        unsafe { *out = CString::into_raw(cs); }
     }
 }
 
@@ -314,6 +355,20 @@ mod tests {
         let s = unsafe { CStr::from_ptr(p) }.to_str().unwrap();
         assert_eq!(s, "\"hello\"");
         gs_free(p);
+    }
+
+    #[test]
+    fn guard_turns_panic_into_error_json() {
+        let mut out = std::ptr::null_mut();
+        assert_eq!(guard(&mut out, || panic!("boom")), 1);
+        let text = unsafe { CStr::from_ptr(out) }.to_str().unwrap();
+        assert!(text.contains("internal panic: boom"));
+        gs_free(out);
+    }
+
+    #[test]
+    fn null_out_slot_is_ignored() {
+        assert_eq!(write_err(std::ptr::null_mut(), "x"), 2);
     }
 
     #[test]
